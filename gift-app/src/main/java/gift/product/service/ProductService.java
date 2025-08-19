@@ -1,7 +1,9 @@
 package gift.product.service;
 
 import gift.product.domain.Product;
+import gift.product.domain.ProductOption;
 import gift.product.dto.ProductEditRequestDto;
+import gift.product.dto.ProductOptionResponseDto;
 import gift.product.dto.ProductRequestDto;
 import gift.product.dto.ProductResponseDto;
 import gift.product.exception.ProductNotFoundException;
@@ -27,6 +29,24 @@ public class ProductService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public Product getProductWithOptions(Long id) {
+        Product product = getProduct(id);
+
+        List<ProductOptionResponseDto> optionsDto = restClient.get()
+                .uri("/api/products/{productId}/options", id)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+
+        if (optionsDto != null) {
+            optionsDto.stream()
+                    .map(dto -> new ProductOption(dto.id(), dto.name(), dto.quantity()))
+                    .forEach(product::addProductOption);
+        }
+
+        return product;
+    }
+
     @Transactional
     public void saveProduct(ProductRequestDto requestDto) {
         restClient.post().uri("/api/admin/products").body(requestDto).retrieve().toBodilessEntity();
@@ -34,7 +54,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<Product> getProducts(Pageable pageable) {
-        // 이제 product-service는 List<DTO>를 반환합니다.
         List<ProductResponseDto> responseList = restClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/admin/products")
                         .queryParam("page", pageable.getPageNumber())
