@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/wishes")
 public class WishApiController {
+
     private final WishService wishService;
 
     public WishApiController(WishService wishService) {

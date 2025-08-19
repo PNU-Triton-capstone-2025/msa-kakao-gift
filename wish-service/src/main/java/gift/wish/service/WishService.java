@@ -1,24 +1,34 @@
 package gift.wish.service;
 
+import gift.product.dto.ProductResponseDto;
 import gift.wish.domain.Wish;
+import gift.wish.dto.WishInfo;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishResponse;
 import gift.wish.repository.WishRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 public class WishService {
 
     private final WishRepository wishRepository;
+    private final RestClient productRestClient;
 
-    public WishService(WishRepository wishRepository) {
+    public WishService(WishRepository wishRepository, RestClient.Builder restClientBuilder) {
         this.wishRepository = wishRepository;
+        this.productRestClient = restClientBuilder
+                .baseUrl("http://localhost:8081")
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -28,21 +38,33 @@ public class WishService {
 
     @Transactional
     public WishResponse addWish(Long memberId, Long productId) {
-        // TODO: product-service에 productId 유효성 검증 API 호출 필요
-        // 지금은 항상 유효하다고 가정
+        validateProductExists(productId);
 
         if (wishRepository.existsByMemberIdAndProductId(memberId, productId)) {
             throw new IllegalArgumentException("이미 위시 리스트에 추가된 상품입니다.");
         }
-        Wish wish = wishRepository.save(new Wish(memberId, productId, 1));
 
-        return new WishResponse(wish.getMemberId(), wish.getProductId(), 1);
+        Wish wish = wishRepository.save(new Wish(memberId, productId, 1));
+        return new WishResponse(wish.getMemberId(), wish.getProductId(), wish.getQuantity());
     }
 
+    @Transactional(readOnly = true)
     public List<WishListResponse> getWishes(Long memberId, Pageable pageable) {
-        return wishRepository.findWishesByMemberId(memberId, pageable)
-                .map(WishListResponse::getWishListResponse)
-                .getContent(); // .getContent()를 추가하여 리스트만 추출합니다.
+        Page<WishInfo> wishInfos = wishRepository.findWishesByMemberId(memberId, pageable);
+
+        return wishInfos.getContent().stream()
+                .map(info -> {
+                    ProductResponseDto product = getProductById(info.product_id());
+                    return new WishListResponse(
+                            info.wishId(),
+                            info.product_id(),
+                            product.name(),
+                            product.price(),
+                            product.imageUrl(),
+                            info.quantity()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -65,5 +87,19 @@ public class WishService {
 
         wish.validateOwner(memberId);
         return wish;
+    }
+
+    private void validateProductExists(Long productId) {
+        productRestClient.get()
+                .uri("/api/admin/products/{id}", productId)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private ProductResponseDto getProductById(Long productId) {
+        return productRestClient.get()
+                .uri("/api/admin/products/{id}", productId)
+                .retrieve()
+                .body(ProductResponseDto.class);
     }
 }
