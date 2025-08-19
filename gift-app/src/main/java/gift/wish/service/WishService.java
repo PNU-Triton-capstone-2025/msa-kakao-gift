@@ -1,5 +1,6 @@
 package gift.wish.service;
 
+import gift.common.page.PageResponse;
 import gift.member.domain.Member;
 import gift.member.dto.MemberTokenRequest;
 import gift.product.domain.Product;
@@ -51,20 +52,28 @@ public class WishService {
 
     @Transactional(readOnly = true)
     public Page<WishListResponse> getWishes(MemberTokenRequest memberTokenRequest, Pageable pageable) {
-        List<WishListResponse> wishes = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/wishes")
-                        .queryParam("page", pageable.getPageNumber())
-                        .queryParam("size", pageable.getPageSize())
-                        .build())
+        var pageResp = restClient.get()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/api/wishes")
+                            .queryParam("page", pageable.getPageNumber())
+                            .queryParam("size", pageable.getPageSize());
+                    pageable.getSort().forEach(o ->
+                            uriBuilder.queryParam("sort", o.getProperty() + "," + o.getDirection())
+                    );
+                    return uriBuilder.build();
+                })
                 .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<WishListResponse>>() {});
+                .body(new org.springframework.core.ParameterizedTypeReference<
+                        PageResponse<WishListResponse>>() {});
 
-        if (wishes == null) {
-            return Page.empty(pageable);
-        }
+        if (pageResp == null) return Page.empty(pageable);
 
-        return new PageImpl<>(wishes, pageable, wishes.size());
+        return new PageImpl<>(
+                pageResp.content(),
+                pageable,
+                pageResp.totalElements()
+        );
     }
 
     public void addWish(MemberTokenRequest memberTokenRequest, Long productId) {

@@ -1,5 +1,6 @@
 package gift.product.service;
 
+import gift.common.page.PageResponse;
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
 import gift.product.dto.ProductEditRequestDto;
@@ -54,23 +55,27 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public Page<Product> getProducts(Pageable pageable) {
-        List<ProductResponseDto> responseList = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/admin/products")
-                        .queryParam("page", pageable.getPageNumber())
-                        .queryParam("size", pageable.getPageSize())
-                        .build())
+        var pageResp = restClient.get()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/api/admin/products")
+                            .queryParam("page", pageable.getPageNumber())
+                            .queryParam("size", pageable.getPageSize());
+                    pageable.getSort().forEach(o ->
+                            uriBuilder.queryParam("sort", o.getProperty() + "," + o.getDirection())
+                    );
+                    return uriBuilder.build();
+                })
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<ProductResponseDto>>() {});
+                .body(new ParameterizedTypeReference<
+                        PageResponse<ProductResponseDto>>() {});
 
-        if (responseList == null) {
-            return Page.empty();
-        }
+        if (pageResp == null) return Page.empty(pageable);
 
-        List<Product> productList = responseList.stream()
+        var content = pageResp.content().stream()
                 .map(dto -> new Product(dto.id(), dto.name(), dto.price(), dto.imageUrl()))
-                .collect(Collectors.toList());
+                .toList();
 
-        return new PageImpl<>(productList, pageable, productList.size());
+        return new PageImpl<>(content, pageable, pageResp.totalElements());
     }
 
     @Transactional(readOnly = true)

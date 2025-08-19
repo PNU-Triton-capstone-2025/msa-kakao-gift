@@ -1,5 +1,6 @@
 package gift.wish.controller;
 
+import gift.common.page.PageResponse;
 import gift.wish.domain.Wish;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishRequest;
@@ -9,6 +10,8 @@ import gift.wish.service.WishService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -51,12 +54,12 @@ public class WishApiController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WishListResponse>> getWishes(
+    public ResponseEntity<PageResponse<WishListResponse>> getWishes(
             @RequestHeader("X-Member-Id") Long memberId,
-            Pageable pageable
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        List<WishListResponse> wishes = wishService.getWishes(memberId, pageable);
-        return ResponseEntity.ok(wishes);
+        var page = wishService.getWishes(memberId, pageable);
+        return ResponseEntity.ok(PageResponse.from(page));
     }
 
     @PatchMapping("/{wishId}")

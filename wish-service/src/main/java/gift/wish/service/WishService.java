@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -49,22 +50,20 @@ public class WishService {
     }
 
     @Transactional(readOnly = true)
-    public List<WishListResponse> getWishes(Long memberId, Pageable pageable) {
-        Page<WishInfo> wishInfos = wishRepository.findWishesByMemberId(memberId, pageable);
+    public Page<WishListResponse> getWishes(Long memberId, Pageable pageable) {
+        Page<WishInfo> page = wishRepository.findWishesByMemberId(memberId, pageable);
 
-        return wishInfos.getContent().stream()
+        // (페이지 내 중복 product_id 캐시로 N+1 완화
+        HashMap<Long, ProductResponseDto> cache = new HashMap<>();
+
+        var content = page.getContent().stream()
                 .map(info -> {
-                    ProductResponseDto product = getProductById(info.product_id());
-                    return new WishListResponse(
-                            info.wishId(),
-                            info.product_id(),
-                            product.name(),
-                            product.price(),
-                            product.imageUrl(),
-                            info.quantity()
-                    );
+                    ProductResponseDto prod = cache.computeIfAbsent(info.product_id(), this::getProductById);
+                    return WishListResponse.getWishListResponse(info, prod);
                 })
-                .collect(Collectors.toList());
+                .toList();
+
+        return new PageImpl<>(content, pageable, page.getTotalElements());
     }
 
     @Transactional
