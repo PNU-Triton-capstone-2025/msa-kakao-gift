@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -21,9 +22,8 @@ public class WishService {
     }
 
     @Transactional(readOnly = true)
-    public Wish getWish(Long wishId) {
-        return wishRepository.findById(wishId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 위시리스트 항목입니다."));
+    public Wish getWish(Long memberId, Long wishId) {
+        return checkValidWishAndMember(memberId, wishId);
     }
 
     @Transactional
@@ -39,10 +39,10 @@ public class WishService {
         return new WishResponse(wish.getMemberId(), wish.getProductId(), 1);
     }
 
-    @Transactional(readOnly = true)
-    public Page<WishListResponse> getWishes(Long memberId, Pageable pageable) {
+    public List<WishListResponse> getWishes(Long memberId, Pageable pageable) {
         return wishRepository.findWishesByMemberId(memberId, pageable)
-                .map(WishListResponse::getWishListResponse);
+                .map(WishListResponse::getWishListResponse)
+                .getContent(); // .getContent()를 추가하여 리스트만 추출합니다.
     }
 
     @Transactional
