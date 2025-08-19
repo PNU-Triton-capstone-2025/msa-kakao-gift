@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<th:block layout:fragment="title">위시 리스트</th:block>
+
+<th:block layout:fragment="css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; }
+        .delete-btn { padding: 5px 10px; background-color: #dc3545; color: white; border: none; cursor: pointer; border-radius: 4px; }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="container">
+        <h1>나의 위시 리스트</h1>
+        <table>
+            <thead>
+            <tr>
+                <th>상품 이미지</th>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>수량</th>
+                <th>삭제</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${wishes.isEmpty()}">
+                <td colspan="5" style="text-align: center;">위시 리스트에 담긴 상품이 없습니다.</td>
+            </tr>
+            <tr th:each="wish : ${wishes.content}">
+                <td><img th:src="${wish.productImageUrl}" th:alt="${wish.productName}" width="100"></td>
+                <td th:text="${wish.productName}">상품명</td>
+                <td th:text="${wish.productPrice}">상품 가격</td>
+                <td>
+                    <form th:action="@{'/wishes/update/' + ${wish.wishId}}" method="post" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="number" name="quantity" th:value="${wish.quantity}" class="form-control" style="width: 60px; text-align: center;" min="1"/>
+                        <button type="submit" class="btn btn-sm btn-primary">수정</button>
+                    </form>
+                </td>
+                <td>
+                    <a th:href="@{/orders/form(wishId=${wish.wishId})}" class="btn btn-sm btn-success" style="margin-top: 5px;">주문하기</a>
+                    <form th:action="@{'/wishes/delete/' + ${wish.wishId}}" method="post">
+                        <button type="submit" class="delete-btn" onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${wishes.totalPages > 0}" class="pagination" th:with="page=${wishes}">
+            <a th:href="${page.first} ? '#' : @{/wishes(page=${page.number - 1})}"
+               th:classappend="${page.first} ? 'disabled' : ''">&laquo;</a>
+
+            <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+                <a th:if="${i >= page.number - 2 and i <= page.number + 2}"
+                   th:href="@{/wishes(page=${i})}"
+                   th:text="${i + 1}"
+                   th:classappend="${page.number == i} ? 'active' : ''"></a>
+            </th:block>
+
+            <a th:href="${page.last} ? '#' : @{/wishes(page=${page.number + 1})}"
+               th:classappend="${page.last} ? 'disabled' : ''">&raquo;</a>
+        </div>
+    </div>
+
+
+</div>
+</html>

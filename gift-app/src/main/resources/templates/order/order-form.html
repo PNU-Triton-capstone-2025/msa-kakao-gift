@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+<th:block layout:fragment="title">주문하기</th:block>
+<th:block layout:fragment="css">
+    <style>
+        .order-container { display: flex; gap: 40px; }
+        .product-details { flex: 1; }
+        .order-form { flex: 1; }
+        .option-label { display: block; margin-bottom: 10px; }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="container">
+        <h1>나에게 선물하기</h1>
+        <form th:action="@{/orders/create}" th:object="${order}" method="post">
+            <div class="order-container">
+                <div class="product-details">
+                    <h3 th:text="${product.name}">상품명</h3>
+                    <img th:src="${product.imageUrl}" alt="상품 이미지" style="max-width: 100%; border-radius: 8px;">
+                    <p style="font-size: 1.2em; font-weight: bold;" th:text="${product.price} + '원'">가격</p>
+                </div>
+                <div class="order-form">
+                    <h4>옵션 선택</h4>
+                    <div th:each="option : ${product.productOptions}" class="form-check">
+                        <input type="radio" class="form-check-input" name="optionId" th:value="${option.id}" th:id="'option' + ${option.id}" required>
+                        <label class="form-check-label" th:for="'option' + ${option.id}" th:text="${option.name} + ' (남은 수량: ' + ${option.quantity} + ')'">옵션명</label>
+                    </div>
+                    <hr/>
+                    <div class="form-group mt-3">
+                        <label for="quantity">수량</label>
+                        <input type="number" id="quantity" th:field="*{quantity}" class="form-control" min="1" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="message">메시지</label>
+                        <textarea id="message" th:field="*{message}" class="form-control" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-4">주문 완료</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

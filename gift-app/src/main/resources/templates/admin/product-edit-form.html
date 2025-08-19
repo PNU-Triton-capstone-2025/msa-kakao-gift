@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 수정</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        .form-container { width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px}
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
+        .form-actions button { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; }
+        .submit-btn { background-color: #28a745; }
+        .cancel-btn { background-color: #6c757d; text-decoration: none; display: inline-block; }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+<div class="form-container">
+    <h1>상품 수정</h1>
+    <form th:action="@{/admin/products/edit/{productId}(productId=${productId})}" th:object="${product}" method="post">
+        <div class="form-group">
+            <label for="name">상품명</label>
+            <input type="text" id="name" th:field="*{name}" required>
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></p>
+        </div>
+        <div class="form-group">
+            <label for="price">가격</label>
+            <input type="number" id="price" th:field="*{price}" required>
+            <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="error-message"></p>
+        </div>
+        <div class="form-group">
+            <label for="imageUrl">이미지 URL</label>
+            <input type="text" id="imageUrl" th:field="*{imageUrl}" required>
+            <p th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}" class="error-message"></p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">수정</button>
+            <a th:href="@{/admin/products}" class="cancel-btn">취소</a>
+        </div>
+    </form>
+</div>
+</body>
+
+</html>

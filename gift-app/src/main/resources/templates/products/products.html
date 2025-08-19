@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+<th:block layout:fragment="title">상품 목록</th:block>
+
+<th:block layout:fragment="css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
+        th { background-color: #f2f2f2; }
+        .wish-btn { padding: 5px 10px; background-color: #ffc107; color: black; border: none; cursor: pointer; border-radius: 4px; }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <h1>전체 상품 목록</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>상품 이미지</th>
+            <th>상품명</th>
+            <th>가격</th>
+            <th>위시 리스트</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products.content}">
+            <td><img th:src="${product.imageUrl}" th:alt="${product.name}" width="100"></td>
+            <td th:text="${product.name}">상품명</td>
+            <td th:text="${product.price} + '원'">가격</td>
+            <td>
+                <form th:action="@{/wishes/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <button type="submit" class="wish-btn">❤️ 추가</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div th:if="${products.totalPages > 0}" class="pagination" th:with="page=${products}">
+        <a th:href="${page.first} ? '#' : @{/products(page=${page.number - 1})}"
+           th:classappend="${page.first} ? 'disabled' : ''">&laquo;</a>
+
+        <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+            <a th:if="${i >= page.number - 2 and i <= page.number + 2}"
+               th:href="@{/products(page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${page.number == i} ? 'active' : ''"></a>
+        </th:block>
+
+        <a th:href="${page.last} ? '#' : @{/products(page=${page.number + 1})}"
+           th:classappend="${page.last} ? 'disabled' : ''">&raquo;</a>
+    </div>
+</div>
+</html>

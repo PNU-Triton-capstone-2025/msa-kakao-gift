@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header" class="navbar">
+    <a href="/" class="nav-brand">🎁 GiftShop</a>
+    <nav class="nav-items">
+        <div class="nav-items">
+            <th:block th:if="${isLoggedIn}">
+                <a href="/products" class="nav-link">상품 목록</a>
+            </th:block>
+
+            <th:block th:if="${isLoggedIn}">
+                <a href="/members/mypage" class="nav-link">마이페이지</a>
+            </th:block>
+            <th:block th:if="${isLoggedIn}">
+                <form th:action="@{/members/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="nav-link" style="border:none; background:none; cursor:pointer; padding:0; font-size: 1em;">로그아웃</button>
+                </form>
+            </th:block>
+            <th:block th:unless="${isLoggedIn}">
+                <a href="/members/login" class="nav-link">로그인</a>
+            </th:block>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

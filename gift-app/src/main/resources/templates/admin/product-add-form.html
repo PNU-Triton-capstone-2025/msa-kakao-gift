@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>새 상품 추가</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        .form-container { width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px}
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; }
+        .form-actions button { padding: 10px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; }
+        .submit-btn { background-color: #28a745; }
+        .cancel-btn { background-color: #6c757d; text-decoration: none; display: inline-block; }
+
+        .option-section { margin-top: 20px; padding: 15px; border: 1px dashed #007bff; border-radius: 5px; }
+        .option-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .option-item .form-group { flex-grow: 1; margin-bottom: 0; }
+        .remove-option-btn { background-color: #dc3545; padding: 5px 10px; font-size: 0.8em; }
+        .add-option-btn { background-color: #007bff; margin-top: 10px; }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+<div class="form-container">
+    <h1>상품 추가</h1>
+    <form th:action="@{/admin/products/add}" th:object="${product}" method="post">
+        <div class="form-group">
+            <label for="name">상품명</label>
+            <input type="text" id="name" th:field="*{name}" required>
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></p>
+        </div>
+        <div class="form-group">
+            <label for="price">가격</label>
+            <input type="number" id="price" th:field="*{price}" required>
+            <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="error-message"></p>
+        </div>
+        <div class="form-group">
+            <label for="imageUrl">이미지 URL</label>
+            <input type="text" id="imageUrl" th:field="*{imageUrl}" required>
+            <p th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}" class="error-message"></p>
+        </div>
+
+        <div class="option-section">
+            <h2>상품 옵션</h2>
+            <p th:if="${#fields.hasErrors('options')}" th:errors="*{options}" class="error-message"></p>
+            <div id="options-wrapper">
+                <div class="option-item" th:each="option, status : *{options}">
+                    <div class="form-group">
+                        <label th:for="${'optionName' + status.index}">옵션명</label>
+                        <input type="text" th:id="${'optionName' + status.index}" th:field="*{options[__${status.index}__].name}" placeholder="e.g. 기본 옵션">
+                        <p th:if="${#fields.hasErrors('options[__${status.index}__].name')}" th:errors="*{options[__${status.index}__].name}" class="error-message"></p>
+                    </div>
+                    <div class="form-group">
+                        <label th:for="${'optionQuantity' + status.index}">수량</label>
+                        <input type="number" th:id="${'optionQuantity' + status.index}" th:field="*{options[__${status.index}__].quantity}">
+                        <p th:if="${#fields.hasErrors('options[__${status.index}__].quantity')}" th:errors="*{options[__${status.index}__].quantity}" class="error-message"></p>
+                    </div>
+                    <button type="button" class="remove-option-btn" onclick="removeOption(this)">삭제</button>
+                </div>
+            </div>
+            <button type="button" class="add-option-btn" onclick="addOption()">옵션 추가</button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="submit-btn">등록</button>
+            <a th:href="@{/admin/products}" class="cancel-btn">취소</a>
+        </div>
+    </form>
+</div>
+
+<div id="message-box" class="message-box"></div>
+
+<script>
+    let optionIndex = document.querySelectorAll('.option-item').length;
+
+    function addOption() {
+        const wrapper = document.getElementById('options-wrapper');
+        const newOption = document.createElement('div');
+        newOption.className = 'option-item';
+        newOption.innerHTML = `
+            <div class="form-group">
+                <label for="optionName${optionIndex}">옵션명</label>
+                <input type="text" id="optionName${optionIndex}" name="options[${optionIndex}].name" placeholder="e.g. 기본 옵션">
+            </div>
+            <div class="form-group">
+                <label for="optionQuantity${optionIndex}">수량</label>
+                <input type="number" id="optionQuantity${optionIndex}" name="options[${optionIndex}].quantity" value="1">
+            </div>
+            <button type="button" class="remove-option-btn" onclick="removeOption(this)">삭제</button>
+        `;
+        wrapper.appendChild(newOption);
+        optionIndex++;
+    }
+
+    function removeOption(button) {
+        const wrapper = document.getElementById('options-wrapper');
+        if (wrapper.childElementCount > 1) {
+            button.parentElement.remove();
+        } else {
+            showMessage('상품에는 최소 1개 이상의 옵션이 필요합니다.');
+        }
+    }
+
+    function showMessage(message) {
+        const messageBox = document.getElementById('message-box');
+        messageBox.textContent = message;
+        messageBox.style.display = 'block';
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+        }, 3000);
+    }
+</script>
+</body>
+
+</html>

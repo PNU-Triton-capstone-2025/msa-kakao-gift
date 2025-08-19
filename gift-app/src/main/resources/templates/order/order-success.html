@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+<th:block layout:fragment="title">주문 완료</th:block>
+<div layout:fragment="content">
+    <div class="container text-center">
+        <h1 class="mt-5">🎉 주문이 성공적으로 완료되었습니다.</h1>
+        <p class="lead">카카오로 로그인하신 경우, 카카오톡으로 주문 내역이 발송됩니다.</p>
+        <a href="/products" class="btn btn-primary mt-3">계속 쇼핑하기</a>
+    </div>
+</div>
+</html>

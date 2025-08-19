@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+<th:block layout:fragment="title">선물하기</th:block>
+
+<th:block layout:fragment="css">
+    <style>
+        .hero-wrapper {
+            background: linear-gradient(to bottom, #fff, #fdf6e3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            min-height: calc(100vh - 75px);
+
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        * { box-sizing: border-box; }
+
+        .hero {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px 20px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            animation: fadeIn 1s ease;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .hero-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #ffe812;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .hero-button:hover {
+            background-color: #ffec3d;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="hero-wrapper">
+        <section class="hero">
+            <h1>🎁 마음을 전하는 선물</h1>
+            <p>소중한 사람에게 따뜻한 마음을 전해보세요.</p>
+            <a href="/members/login" class="hero-button">선물하러 가기</a>
+        </section>
+    </div>
+</div>
+</html>

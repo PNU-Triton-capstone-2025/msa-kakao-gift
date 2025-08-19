@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout/layout">
+
+<th:block layout:fragment="title">마이페이지</th:block>
+
+<th:block layout:fragment="css">
+    <style>
+        .my-container { width: 400px; margin: 60px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .info-group { margin-bottom: 20px; font-size: 1.1em; }
+        .btn { display: block; width: 100%; text-align: center; padding: 10px; text-decoration: none; border-radius: 4px; margin-bottom: 10px; color: white; border: none; font-size: 1em; cursor: pointer; }
+        .btn-primary { background-color: #007bff; }
+        .btn-danger { background-color: #dc3545; }
+        .form-group { margin-top: 20px; }
+    </style>
+</th:block>
+
+<div layout:fragment="content">
+    <div class="my-container">
+        <h1>마이페이지</h1>
+        <div class="info-group">
+            <strong>이메일:</strong> <span th:text="${member.email}">user@example.com</span>
+        </div>
+        <a href="/members/edit" class="btn btn-primary">비밀번호 변경</a>
+        <hr>
+        <form th:action="@{/members/delete}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.');">
+            <div class="form-group">
+                <label for="password">비밀번호 확인</label>
+                <input type="password" id="password" name="password" placeholder="회원 탈퇴를 위해 비밀번호를 입력하세요" required style="width: 100%; padding: 10px; box-sizing: border-box; margin-top: 5px;">
+            </div>
+            <button type="submit" class="btn btn-danger" style="margin-top: 10px;">회원 탈퇴</button>
+        </form>
+    </div>
+</div>
+</html>
