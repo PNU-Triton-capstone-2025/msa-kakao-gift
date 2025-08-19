@@ -7,6 +7,4 @@ public record WishInfo(
         Integer productPrice,
         String productImageUrl,
         Integer quantity
-) {
-
-}
+) {}

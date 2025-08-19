@@ -1,7 +1,6 @@
 package gift.wish.controller;
 
 import gift.auth.Login;
-import gift.common.enums.ProductSortProperty;
 import gift.common.enums.WishSortProperty;
 import gift.common.validation.ValidSort;
 import gift.member.dto.MemberTokenRequest;
@@ -26,7 +25,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/wishes")
 public class WishController {
-    private WishService wishService;
+    private final WishService wishService;
 
     public WishController(WishService wishService){
         this.wishService = wishService;
