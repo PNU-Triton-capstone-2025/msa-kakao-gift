@@ -1,9 +1,7 @@
 package gift.wish.controller;
 
-import gift.auth.Login;
 import gift.common.enums.WishSortProperty;
 import gift.common.validation.ValidSort;
-import gift.member.dto.MemberTokenRequest;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishRequest;
 import gift.wish.dto.WishUpdateRequest;
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,33 +33,29 @@ public class WishApiController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addWish(@Login MemberTokenRequest memberTokenRequest, @Valid @RequestBody WishRequest request) {
-        wishService.addWish(memberTokenRequest ,request.productId());
-
+    public ResponseEntity<Void> addWish(@RequestHeader("X-Member-Id") Long memberId, @Valid @RequestBody WishRequest request) {
+        wishService.addWish(memberId ,request.productId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping
     public ResponseEntity<Page<WishListResponse>> getWishes(
-            @Login MemberTokenRequest memberTokenRequest,
-            @ValidSort(enumClass = WishSortProperty.class)
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestHeader("X-Member-Id") Long memberId,
+            Pageable pageable
     ) {
-        Page<WishListResponse> wishes = wishService.getWishes(memberTokenRequest, pageable);
-
+        Page<WishListResponse> wishes = wishService.getWishes(memberId, pageable);
         return ResponseEntity.ok(wishes);
     }
 
     @PatchMapping("/{wishId}")
-    public ResponseEntity<Void> updateWish(@Login MemberTokenRequest memberTokenRequest, @PathVariable Long wishId, @RequestBody WishUpdateRequest request){
-        wishService.updateQuantity(memberTokenRequest, wishId, request.quantity());
-
+    public ResponseEntity<Void> updateWish(@RequestHeader("X-Member-Id") Long memberId, @PathVariable Long wishId, @RequestBody @Valid WishUpdateRequest request){
+        wishService.updateQuantity(memberId, wishId, request.quantity());
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{wishId}")
-    public ResponseEntity<Void> deleteWish(@Login MemberTokenRequest memberTokenRequest, @PathVariable Long wishId){
-        wishService.deleteWish(memberTokenRequest, wishId);
+    public ResponseEntity<Void> deleteWish(@RequestHeader("X-Member-Id") Long memberId, @PathVariable Long wishId){
+        wishService.deleteWish(memberId, wishId);
         return ResponseEntity.noContent().build();
     }
 }
