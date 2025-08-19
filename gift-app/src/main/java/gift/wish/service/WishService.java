@@ -1,80 +1,104 @@
 package gift.wish.service;
 
+import gift.common.page.PageResponse;
 import gift.member.domain.Member;
 import gift.member.dto.MemberTokenRequest;
-import gift.member.repository.MemberRepository;
 import gift.product.domain.Product;
-import gift.product.exception.ProductNotFoundException;
-import gift.product.repository.ProductRepository;
+import gift.product.service.ProductService; // ‼️ ProductService 의존성 필요
 import gift.wish.domain.Wish;
 import gift.wish.dto.WishListResponse;
+import gift.wish.dto.WishRequest;
 import gift.wish.dto.WishResponse;
-import gift.wish.repository.WishRepository;
+import gift.wish.dto.WishUpdateRequest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.NoSuchElementException;
+import org.springframework.web.client.RestClient;
+import java.util.List;
 
 @Service
 public class WishService {
 
-    private final WishRepository wishRepository;
-    private final ProductRepository productRepository;
-    private final MemberRepository memberRepository;
+    private final RestClient restClient;
+    private final ProductService productService;
 
-    public WishService(WishRepository wishRepository, ProductRepository productRepository, MemberRepository memberRepository) {
-        this.wishRepository = wishRepository;
-        this.productRepository = productRepository;
-        this.memberRepository = memberRepository;
+    public WishService(RestClient.Builder restClientBuilder, ProductService productService) {
+        this.productService = productService;
+        this.restClient = restClientBuilder
+                .baseUrl("http://localhost:8082")
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public Wish getWish(Long wishId) {
-        return wishRepository.findById(wishId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 위시리스트 항목입니다."));
-    }
+    public Wish getWish(MemberTokenRequest memberTokenRequest, Long wishId) {
+        WishResponse wishResponse = restClient.get()
+                .uri("/api/wishes/{wishId}", wishId)
+                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .retrieve()
+                .body(WishResponse.class);
 
-    @Transactional
-    public WishResponse addWish(MemberTokenRequest memberTokenRequest, Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("상품을 찾을 수 없습니다. ID: " + productId));
-        Member member = memberRepository.findById(memberTokenRequest.id())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-        if (wishRepository.existsByMemberIdAndProductId(memberTokenRequest.id(), productId)) {
-            throw new IllegalArgumentException("이미 위시 리스트에 추가된 상품입니다.");
+        if (wishResponse == null) {
+            throw new IllegalArgumentException("존재하지 않는 위시리스트 항목입니다.");
         }
-        Wish wish = wishRepository.save(new Wish(member, product, 1));
 
-        return new WishResponse(wish.getMember().getId(), wish.getProduct().getId(), 1);
+        Product product = productService.getProductWithOptions(wishResponse.productId());
+        Member member = new Member(memberTokenRequest.id(), memberTokenRequest.email(), memberTokenRequest.password(), memberTokenRequest.role());
+
+        return new Wish(member, product, wishResponse.quantity());
     }
 
     @Transactional(readOnly = true)
     public Page<WishListResponse> getWishes(MemberTokenRequest memberTokenRequest, Pageable pageable) {
-        return wishRepository.findWishesByMemberId(memberTokenRequest.id(), pageable)
-                .map(WishListResponse::getWishListResponse);
+        var pageResp = restClient.get()
+                .uri(uriBuilder -> {
+                    uriBuilder.path("/api/wishes")
+                            .queryParam("page", pageable.getPageNumber())
+                            .queryParam("size", pageable.getPageSize());
+                    pageable.getSort().forEach(o ->
+                            uriBuilder.queryParam("sort", o.getProperty() + "," + o.getDirection())
+                    );
+                    return uriBuilder.build();
+                })
+                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .retrieve()
+                .body(new org.springframework.core.ParameterizedTypeReference<
+                        PageResponse<WishListResponse>>() {});
+
+        if (pageResp == null) return Page.empty(pageable);
+
+        return new PageImpl<>(
+                pageResp.content(),
+                pageable,
+                pageResp.totalElements()
+        );
     }
 
-    @Transactional
-    public void updateQuantity(MemberTokenRequest memberTokenRequest, Long wishId, Integer quantity){
-        Wish wish = checkValidWishAndMember(memberTokenRequest,wishId);
-
-        wish.updateQuantity(quantity);
+    public void addWish(MemberTokenRequest memberTokenRequest, Long productId) {
+        restClient.post()
+                .uri("/api/wishes")
+                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .body(new WishRequest(productId))
+                .retrieve()
+                .toBodilessEntity();
     }
 
-    @Transactional
-    public void deleteWish(MemberTokenRequest memberTokenRequest, Long wishId){
-        checkValidWishAndMember(memberTokenRequest ,wishId);
-
-        wishRepository.deleteById(wishId);
+    public void updateQuantity(MemberTokenRequest memberTokenRequest, Long wishId, Integer quantity) {
+        restClient.patch()
+                .uri("/api/wishes/{wishId}", wishId)
+                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .body(new WishUpdateRequest(quantity))
+                .retrieve()
+                .toBodilessEntity();
     }
 
-    private Wish checkValidWishAndMember(MemberTokenRequest memberTokenRequest, Long wishId){
-        Wish wish = wishRepository.findById(wishId)
-                .orElseThrow(() -> new NoSuchElementException("해당 위시 항목을 찾을 수 없습니다."));
-
-        wish.validateOwner(memberTokenRequest.id());
-        return wish;
+    public void deleteWish(MemberTokenRequest memberTokenRequest, Long wishId) {
+        restClient.delete()
+                .uri("/api/wishes/{wishId}", wishId)
+                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .retrieve()
+                .toBodilessEntity();
     }
 }

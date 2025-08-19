@@ -29,6 +29,12 @@ public class ProductOption {
 
     }
 
+    public ProductOption(Long id, String name, Integer quantity) {
+        this.id = id;
+        this.name = name;
+        this.quantity = quantity;
+    }
+
     public ProductOption(String name, Integer quantity){
         this.name = name;
         this.quantity = quantity;

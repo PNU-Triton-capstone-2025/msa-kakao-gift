@@ -1,5 +1,7 @@
 package gift.wish.dto;
 
+import gift.product.dto.ProductResponseDto;
+
 public record WishListResponse(
         Long wishId,
         Long product_id,
@@ -8,13 +10,13 @@ public record WishListResponse(
         String productImageUrl,
         Integer quantity
 ) {
-    public static WishListResponse getWishListResponse(WishInfo wishInfo){
+    public static WishListResponse getWishListResponse(WishInfo wishInfo, ProductResponseDto productResponseDto) {
         return new WishListResponse(
                 wishInfo.wishId(),
                 wishInfo.product_id(),
-                wishInfo.productName(),
-                wishInfo.productPrice(),
-                wishInfo.productImageUrl(),
+                productResponseDto.name(),
+                productResponseDto.price(),
+                productResponseDto.imageUrl(),
                 wishInfo.quantity());
     }
 }

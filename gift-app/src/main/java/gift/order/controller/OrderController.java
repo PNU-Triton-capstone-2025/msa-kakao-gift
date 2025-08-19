@@ -4,6 +4,8 @@ import gift.auth.Login;
 import gift.member.dto.MemberTokenRequest;
 import gift.order.dto.OrderRequestDto;
 import gift.order.service.OrderService;
+import gift.product.domain.Product;
+import gift.product.service.ProductService;
 import gift.wish.domain.Wish;
 import gift.wish.service.WishService;
 import org.springframework.stereotype.Controller;
@@ -19,17 +21,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class OrderController {
     private final WishService wishService;
     private final OrderService orderService;
+    private final ProductService productService;
 
-    public OrderController(WishService wishService, OrderService orderService) {
+    public OrderController(WishService wishService, OrderService orderService,  ProductService productService) {
         this.wishService = wishService;
         this.orderService = orderService;
+        this.productService = productService;
     }
 
     @GetMapping("/form")
-    public String orderForm(@RequestParam("wishId") Long wishId, Model model) {
-        Wish wish = wishService.getWish(wishId);
+    public String orderForm(@Login MemberTokenRequest memberTokenRequest, @RequestParam("wishId") Long wishId, Model model) {
+        Wish wish = wishService.getWish(memberTokenRequest, wishId);
 
-        model.addAttribute("product", wish.getProduct());
+        Product productWithOptions = productService.getProductWithOptions(wish.getProduct().getId());
+
+        model.addAttribute("product", productWithOptions);
         model.addAttribute("order", OrderRequestDto.getDefault(wish.getQuantity()));
 
         return "order/order-form";
