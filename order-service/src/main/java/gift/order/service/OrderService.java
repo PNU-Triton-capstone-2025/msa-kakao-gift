@@ -4,6 +4,9 @@ import gift.order.domain.Order;
 import gift.order.dto.OrderRequestDto;
 import gift.order.dto.OrderResponseDto;
 import gift.order.repository.OrderRepository;
+import gift.product.dto.ProductOptionDetailDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -13,6 +16,7 @@ import java.util.Map;
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final RestClient productRestClient;
     private final RestClient wishRestClient;
@@ -33,14 +37,34 @@ public class OrderService {
     public OrderResponseDto createOrder(OrderRequestDto requestDto, Long memberId) {
         subtractProductStock(requestDto.optionId(), requestDto.quantity());
 
+        Long productId = getProductIdForOption(requestDto.optionId());
+
         Order order = new Order(requestDto.optionId(), memberId, requestDto.quantity(), requestDto.message());
         orderRepository.save(order);
 
-        deleteWish(memberId, requestDto.optionId());
+        deleteWish(memberId, productId);
 
         // TODO: 카카오 메시지 발송 로직은 향후 'notification-service'로 분리될 예정입니다.
 
         return OrderResponseDto.from(order);
+    }
+
+    private Long getProductIdForOption(Long optionId) {
+        try {
+            ProductOptionDetailDto optionDetail = productRestClient.get()
+                    .uri("/api/products/options/{optionId}/detail", optionId)
+                    .retrieve()
+                    .body(ProductOptionDetailDto.class);
+
+            if (optionDetail == null) {
+                throw new IllegalStateException("상품 옵션 정보를 찾을 수 없습니다: " + optionId);
+            }
+            return optionDetail.productId();
+        } catch (Exception e) {
+            log.error("product-service에서 옵션 정보 조회 실패 - optionId: {}", optionId, e);
+            // 이 경우 주문을 실패 처리해야 합니다. 상품 정보 없이는 주문을 진행할 수 없습니다.
+            throw new IllegalStateException("상품 정보를 조회하는 데 실패했습니다.", e);
+        }
     }
 
     private void subtractProductStock(Long optionId, Integer quantity) {
@@ -51,21 +75,15 @@ public class OrderService {
                 .toBodilessEntity();
     }
 
-    private void deleteWish(Long memberId, Long optionId) {
+    private void deleteWish(Long memberId, Long productId) {
         try {
-            // wish-service에 optionId가 아닌 productId로 삭제를 요청해야 합니다.
-            // 지금은 optionId로 productId를 알 수 없으므로, 이 부분은 향후 리팩토링이 필요합니다.
-            // 우선은 wish-service에 productId를 받는 삭제 API가 있다고 가정하고 호출합니다.
-            // wishRestClient.delete()
-            //     .uri("/api/wishes/product/{productId}", productId)
-            //     .header("X-Member-Id", String.valueOf(memberId))
-            //     .retrieve()
-            //     .toBodilessEntity();
-            // -> 이 부분은 wish-service에 해당 API가 없으므로 지금은 주석 처리합니다.
-            //    실제 구현 시에는 product-service에서 optionId로 productId를 조회한 후 호출해야 합니다.
+            wishRestClient.delete()
+                    .uri("/api/wishes/member/{memberId}/product/{productId}", memberId, productId)
+                    .retrieve()
+                    .toBodilessEntity();
         } catch (Exception e) {
-            // 위시리스트에 없어도 주문은 성공해야 하므로, 오류를 로깅만 하고 무시합니다.
-            System.err.println("Wishlist item deletion failed: " + e.getMessage());
+            // 위시리스트 삭제 실패는 주문 성공에 영향을 주지 않아야 합니다. 로그만 남깁니다.
+            log.error("주문 완료 후 위시리스트 삭제 요청 실패 - memberId: {}, productId: {}", memberId, productId, e);
         }
     }
 }

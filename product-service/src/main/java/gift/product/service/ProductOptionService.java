@@ -2,6 +2,7 @@ package gift.product.service;
 
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
+import gift.product.dto.ProductOptionDetailDto;
 import gift.product.dto.ProductOptionRequestDto;
 import gift.product.dto.ProductOptionResponseDto;
 import gift.product.exception.ProductNotFoundException;
@@ -53,5 +54,14 @@ public class ProductOptionService {
                 .orElseThrow(() -> new IllegalArgumentException("옵션을 찾을 수 없습니다."));
 
         option.subtractQuantity(quantity);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductOptionDetailDto getProductOptionDetail(Long optionId) {
+        ProductOption option = productOptionRepository.findById(optionId)
+                .orElseThrow(() -> new ProductNotFoundException("옵션을 찾을 수 없습니다. ID: " + optionId));
+
+        Product product = option.getProduct();
+        return new ProductOptionDetailDto(option.getId(), product.getId(), product.getName(), option.getName());
     }
 }

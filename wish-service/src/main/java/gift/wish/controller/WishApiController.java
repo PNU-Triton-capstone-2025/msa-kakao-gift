@@ -73,4 +73,13 @@ public class WishApiController {
         wishService.deleteWish(memberId, wishId);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/member/{memberId}/product/{productId}")
+    public ResponseEntity<Void> deleteWishByMemberAndProduct(
+            @PathVariable("memberId") Long memberId,
+            @PathVariable("productId") Long productId) {
+        wishService.deleteWishByMemberAndProductId(memberId, productId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

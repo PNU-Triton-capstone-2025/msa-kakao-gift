@@ -1,5 +1,6 @@
 package gift.product.controller;
 
+import gift.product.dto.ProductOptionDetailDto;
 import gift.product.dto.ProductOptionRequestDto;
 import gift.product.dto.ProductOptionResponseDto;
 import gift.product.service.ProductOptionService;
@@ -24,6 +25,12 @@ public class ProductOptionApiController {
     public ResponseEntity<List<ProductOptionResponseDto>> getOptions(@PathVariable Long productId) {
         List<ProductOptionResponseDto> options = optionService.getProductOptions(productId);
         return ResponseEntity.ok(options);
+    }
+
+    @GetMapping("/options/{optionId}/detail")
+    public ResponseEntity<ProductOptionDetailDto> getOptionDetail(@PathVariable("optionId") Long optionId) {
+        ProductOptionDetailDto response = optionService.getProductOptionDetail(optionId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{productId}/options")
