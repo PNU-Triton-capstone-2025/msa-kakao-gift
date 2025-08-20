@@ -30,7 +30,6 @@ public class ProductService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public Product getProductWithOptions(Long id) {
         Product product = getProduct(id);
 
@@ -48,12 +47,10 @@ public class ProductService {
         return product;
     }
 
-    @Transactional
     public void saveProduct(ProductRequestDto requestDto) {
         restClient.post().uri("/api/admin/products").body(requestDto).retrieve().toBodilessEntity();
     }
 
-    @Transactional(readOnly = true)
     public Page<Product> getProducts(Pageable pageable) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {
@@ -78,7 +75,6 @@ public class ProductService {
         return new PageImpl<>(content, pageable, pageResp.totalElements());
     }
 
-    @Transactional(readOnly = true)
     public Product getProduct(Long id) {
         ProductResponseDto responseDto = restClient.get().uri("/api/admin/products/{id}", id).retrieve().body(ProductResponseDto.class);
 
@@ -86,12 +82,10 @@ public class ProductService {
         return new Product(responseDto.id(), responseDto.name(), responseDto.price(), responseDto.imageUrl());
     }
 
-    @Transactional
     public void update(Long id, ProductEditRequestDto requestDto) {
         restClient.put().uri("/api/admin/products/{id}", id).body(requestDto).retrieve().toBodilessEntity();
     }
 
-    @Transactional
     public void delete(Long id) {
         restClient.delete().uri("/api/admin/products/{id}", id).retrieve().toBodilessEntity();
     }

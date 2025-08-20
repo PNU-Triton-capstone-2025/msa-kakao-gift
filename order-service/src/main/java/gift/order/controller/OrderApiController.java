@@ -1,16 +1,12 @@
 package gift.order.controller;
 
-import gift.auth.Login;
-import gift.member.dto.MemberTokenRequest;
 import gift.order.dto.OrderRequestDto;
 import gift.order.dto.OrderResponseDto;
 import gift.order.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -22,8 +18,11 @@ public class OrderApiController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderResponseDto> createOrder(@Login MemberTokenRequest memberTokenRequest, @RequestBody OrderRequestDto requestDto) {
-        OrderResponseDto responseDto = orderService.createOrder(requestDto, memberTokenRequest);
+    public ResponseEntity<OrderResponseDto> createOrder(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @Valid @RequestBody OrderRequestDto requestDto) {
+
+        OrderResponseDto responseDto = orderService.createOrder(requestDto, memberId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
