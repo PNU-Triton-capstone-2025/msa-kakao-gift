@@ -15,26 +15,30 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final RestClient productRestClient;
+    private final RestClient wishRestClient;
 
     public OrderService(OrderRepository orderRepository, RestClient.Builder restClientBuilder) {
         this.orderRepository = orderRepository;
         this.productRestClient = restClientBuilder
-                .baseUrl("http://localhost:8081") // product-service의 주소
+                .clone()
+                .baseUrl("http://localhost:8081")
+                .build();
+        this.wishRestClient = restClientBuilder
+                .clone()
+                .baseUrl("http://localhost:8082")
                 .build();
     }
 
     @Transactional
     public OrderResponseDto createOrder(OrderRequestDto requestDto, Long memberId) {
-        // 1. product-service에 API를 호출하여 재고를 차감합니다.
-        //    (존재하지 않는 옵션이거나 재고가 부족하면 product-service에서 예외를 발생시킬 것입니다)
         subtractProductStock(requestDto.optionId(), requestDto.quantity());
 
-        // 2. 재고 차감이 성공하면, 주문을 생성하고 자신의 DB에 저장합니다.
         Order order = new Order(requestDto.optionId(), memberId, requestDto.quantity(), requestDto.message());
         orderRepository.save(order);
 
-        // TODO: 주문 완료 후 wish-service에 API를 호출하여 해당 상품을 위시리스트에서 제거하는 로직 추가
-        // TODO: 카카오 사용자인 경우, 외부 Kakao API를 호출하여 메시지를 발송하는 로직 추가
+        deleteWish(memberId, requestDto.optionId());
+
+        // TODO: 카카오 메시지 발송 로직은 향후 'notification-service'로 분리될 예정입니다.
 
         return OrderResponseDto.from(order);
     }
@@ -45,5 +49,23 @@ public class OrderService {
                 .body(Map.of("quantity", quantity))
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    private void deleteWish(Long memberId, Long optionId) {
+        try {
+            // wish-service에 optionId가 아닌 productId로 삭제를 요청해야 합니다.
+            // 지금은 optionId로 productId를 알 수 없으므로, 이 부분은 향후 리팩토링이 필요합니다.
+            // 우선은 wish-service에 productId를 받는 삭제 API가 있다고 가정하고 호출합니다.
+            // wishRestClient.delete()
+            //     .uri("/api/wishes/product/{productId}", productId)
+            //     .header("X-Member-Id", String.valueOf(memberId))
+            //     .retrieve()
+            //     .toBodilessEntity();
+            // -> 이 부분은 wish-service에 해당 API가 없으므로 지금은 주석 처리합니다.
+            //    실제 구현 시에는 product-service에서 optionId로 productId를 조회한 후 호출해야 합니다.
+        } catch (Exception e) {
+            // 위시리스트에 없어도 주문은 성공해야 하므로, 오류를 로깅만 하고 무시합니다.
+            System.err.println("Wishlist item deletion failed: " + e.getMessage());
+        }
     }
 }

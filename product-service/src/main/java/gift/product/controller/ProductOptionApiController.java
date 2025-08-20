@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -34,6 +35,16 @@ public class ProductOptionApiController {
     @DeleteMapping("/options/{optionId}")
     public ResponseEntity<Void> deleteOption(@PathVariable Long optionId) {
         optionService.deleteOption(optionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/options/{optionId}/subtract-quantity")
+    public ResponseEntity<Void> subtractQuantity(@PathVariable Long optionId, @RequestBody Map<String, Integer> payload) {
+        Integer quantity = payload.get("quantity");
+        if (quantity == null || quantity < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        optionService.subtractOption(optionId, quantity);
         return ResponseEntity.noContent().build();
     }
 }

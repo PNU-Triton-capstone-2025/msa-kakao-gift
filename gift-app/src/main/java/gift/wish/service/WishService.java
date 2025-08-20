@@ -32,7 +32,6 @@ public class WishService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
     public Wish getWish(MemberTokenRequest memberTokenRequest, Long wishId) {
         WishResponse wishResponse = restClient.get()
                 .uri("/api/wishes/{wishId}", wishId)
@@ -50,7 +49,6 @@ public class WishService {
         return new Wish(member, product, wishResponse.quantity());
     }
 
-    @Transactional(readOnly = true)
     public Page<WishListResponse> getWishes(MemberTokenRequest memberTokenRequest, Pageable pageable) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {

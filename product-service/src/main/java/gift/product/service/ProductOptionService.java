@@ -1,6 +1,7 @@
 package gift.product.service;
 
 import gift.product.domain.Product;
+import gift.product.domain.ProductOption;
 import gift.product.dto.ProductOptionRequestDto;
 import gift.product.dto.ProductOptionResponseDto;
 import gift.product.exception.ProductNotFoundException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductOptionService {
@@ -43,5 +45,13 @@ public class ProductOptionService {
                 .orElseThrow(() -> new IllegalArgumentException("옵션을 찾을 수 없습니다."));
 
         productOptionRepository.deleteById(optionId);
+    }
+
+    @Transactional
+    public void subtractOption(Long optionId, Integer quantity) {
+        ProductOption option = productOptionRepository.findById(optionId)
+                .orElseThrow(() -> new IllegalArgumentException("옵션을 찾을 수 없습니다."));
+
+        option.subtractQuantity(quantity);
     }
 }
