@@ -1,8 +1,7 @@
 package gift.auth;
 
-import gift.member.domain.Member;
+import gift.member.domain.RoleType;
 import gift.member.dto.MemberTokenRequest;
-import gift.member.repository.MemberRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -15,11 +14,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final JwtUtil jwtUtil;
-    private final MemberRepository memberRepository;
 
-    public LoginArgumentResolver(JwtUtil jwtUtil, MemberRepository memberRepository) {
+    public LoginArgumentResolver(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.memberRepository = memberRepository;
     }
 
     @Override
@@ -35,10 +32,10 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
         String token = AuthUtil.extractToken(request);
 
+        Long id = jwtUtil.getId(token);
         String email = jwtUtil.getEmail(token);
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("토큰에 해당하는 사용자를 찾을 수 없습니다."));
+        RoleType role = jwtUtil.getRoleType(token);
 
-        return new MemberTokenRequest(member.getId(), member.getEmail(), member.getPassword(), member.getRole());
+        return new MemberTokenRequest(id, email, null, role, token);
     }
 }

@@ -1,9 +1,7 @@
 package gift.common.advice;
 
-import gift.auth.oauth.exception.KakaoApiFailedException;
 import gift.product.exception.ProductNotFoundException;
 import gift.wish.exception.WishOwnerException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -66,13 +63,6 @@ public class GlobalExceptionHandler {
             PropertyReferenceException ex
     ) {
         return makeErrorResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(KakaoApiFailedException.class)
-    public ResponseEntity<Map<String, Object>> handleKakaoApiFailedException(
-            KakaoApiFailedException ex
-    ) {
-        return makeErrorResponseEntity(ex.getMessage(), ex.getStatus());
     }
 
     @ExceptionHandler(RuntimeException.class)

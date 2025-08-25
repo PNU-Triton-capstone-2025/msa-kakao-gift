@@ -1,7 +1,9 @@
 package gift.product.controller;
 
+import gift.auth.Login;
 import gift.common.enums.ProductSortProperty;
 import gift.common.validation.ValidSort;
+import gift.member.dto.MemberTokenRequest;
 import gift.product.domain.Product;
 import gift.product.dto.ProductEditRequestDto;
 import gift.product.dto.ProductInfoDto;
@@ -64,14 +66,14 @@ public class ProductAdminController {
     @PostMapping("/add")
     public String addProduct(
             @ModelAttribute("product") @Valid ProductRequestDto requestDto,
-            BindingResult bindingResult
+            BindingResult bindingResult,
+            @Login MemberTokenRequest memberToken
     ){
-
         if(bindingResult.hasErrors()){
             return "admin/product-add-form";
         }
 
-        productService.saveProduct(requestDto);
+        productService.saveProduct(requestDto, memberToken);
         return "redirect:/admin/products";
     }
 
@@ -93,6 +95,7 @@ public class ProductAdminController {
     public String editProduct(
             @PathVariable("id") Long id,
             @ModelAttribute("product") @Valid ProductEditRequestDto requestDto,
+            @Login MemberTokenRequest memberToken,
             BindingResult bindingResult,
             Model model
     ){
@@ -101,14 +104,16 @@ public class ProductAdminController {
             return "/admin/product-edit-form";
         }
 
-        productService.update(id, requestDto);
+        productService.update(id, requestDto, memberToken);
 
         return "redirect:/admin/products/" + id;
     }
 
     @DeleteMapping("/{id}")
-    public String deleteProduct(@PathVariable("id") Long id) {
-        productService.delete(id);
+    public String deleteProduct(
+            @Login MemberTokenRequest memberToken,
+            @PathVariable("id") Long id) {
+        productService.delete(id, memberToken);
 
         return "redirect:/admin/products";
     }
