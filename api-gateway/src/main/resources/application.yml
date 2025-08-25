@@ -1,0 +1,36 @@
+server:
+  port: 8080 # ???? ?? ???
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # User Service
+        - id: user-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/members/**
+
+        # Product Service
+        - id: product-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/admin/products/**, /api/products/**
+
+        # Wish Service
+        - id: wish-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/wishes/**
+
+        # Order Service
+        - id: order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/orders/**
+
+# JWT Secret Key (user-service? ??? ? ??)
+jwt:
+  secret: Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=
