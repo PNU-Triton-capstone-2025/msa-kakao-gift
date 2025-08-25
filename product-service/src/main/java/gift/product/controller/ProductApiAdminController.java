@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -37,11 +39,16 @@ public class ProductApiAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addProduct(@RequestBody @Valid ProductRequestDto requestDto){
-        productService.saveProduct(requestDto);
+    public ResponseEntity<Void> addProduct(
+            @RequestHeader("X-Member-Role") String role,
+            @RequestBody @Valid ProductRequestDto requestDto) throws AccessDeniedException {
 
+        checkAdmin(role);
+
+        productService.saveProduct(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
 
     @GetMapping
     public ResponseEntity<PageResponse<ProductResponseDto>> getProducts(@PageableDefault(size = 10, sort = "id",
@@ -59,14 +66,29 @@ public class ProductApiAdminController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductEditRequestDto requestDto){
+    public ResponseEntity<Void> updateProduct(
+            @RequestHeader("X-Member-Role") String role,
+            @PathVariable Long id,
+            @RequestBody @Valid ProductEditRequestDto requestDto) throws AccessDeniedException {
+
+        checkAdmin(role);
         productService.update(id, requestDto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
+    public ResponseEntity<Void> deleteProduct(
+            @RequestHeader("X-Member-Role") String role,
+            @PathVariable Long id) throws AccessDeniedException {
+
+        checkAdmin(role);
         productService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void checkAdmin(String role) throws AccessDeniedException {
+        if (!"ADMIN".equalsIgnoreCase(role)) {
+            throw new AccessDeniedException("관리자 권한이 필요합니다.");
+        }
     }
 }
