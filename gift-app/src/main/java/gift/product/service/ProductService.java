@@ -1,6 +1,7 @@
 package gift.product.service;
 
 import gift.common.page.PageResponse;
+import gift.member.dto.MemberTokenRequest;
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
 import gift.product.dto.ProductEditRequestDto;
@@ -47,8 +48,13 @@ public class ProductService {
         return product;
     }
 
-    public void saveProduct(ProductRequestDto requestDto) {
-        restClient.post().uri("/api/admin/products").body(requestDto).retrieve().toBodilessEntity();
+    public void saveProduct(ProductRequestDto requestDto, MemberTokenRequest memberToken) {
+        restClient.post()
+                .uri("/api/admin/products")
+                .header("X-Member-Role", memberToken.role().name())
+                .body(requestDto)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public Page<Product> getProducts(Pageable pageable) {
@@ -76,17 +82,29 @@ public class ProductService {
     }
 
     public Product getProduct(Long id) {
-        ProductResponseDto responseDto = restClient.get().uri("/api/admin/products/{id}", id).retrieve().body(ProductResponseDto.class);
+        ProductResponseDto responseDto = restClient.get()
+                .uri("/api/admin/products/{id}", id)
+                .retrieve()
+                .body(ProductResponseDto.class);
 
         if (responseDto == null) throw new ProductNotFoundException("상품을 찾을 수 없습니다. ID: " + id);
         return new Product(responseDto.id(), responseDto.name(), responseDto.price(), responseDto.imageUrl());
     }
 
-    public void update(Long id, ProductEditRequestDto requestDto) {
-        restClient.put().uri("/api/admin/products/{id}", id).body(requestDto).retrieve().toBodilessEntity();
+    public void update(Long id, ProductEditRequestDto requestDto, MemberTokenRequest memberToken) {
+        restClient.put()
+                .uri("/api/admin/products/{id}", id)
+                .header("X-Member-Role", memberToken.role().name())
+                .body(requestDto)
+                .retrieve()
+                .toBodilessEntity();
     }
 
-    public void delete(Long id) {
-        restClient.delete().uri("/api/admin/products/{id}", id).retrieve().toBodilessEntity();
+    public void delete(Long id, MemberTokenRequest memberToken) {
+        restClient.delete()
+                .uri("/api/admin/products/{id}", id)
+                .header("X-Member-Role", memberToken.role().name())
+                .retrieve()
+                .toBodilessEntity();
     }
 }

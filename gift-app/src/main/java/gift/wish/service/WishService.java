@@ -4,20 +4,17 @@ import gift.common.page.PageResponse;
 import gift.member.domain.Member;
 import gift.member.dto.MemberTokenRequest;
 import gift.product.domain.Product;
-import gift.product.service.ProductService; // ‼️ ProductService 의존성 필요
+import gift.product.service.ProductService;
 import gift.wish.domain.Wish;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishRequest;
 import gift.wish.dto.WishResponse;
 import gift.wish.dto.WishUpdateRequest;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
-import java.util.List;
 
 @Service
 public class WishService {

@@ -37,6 +37,10 @@ public class JwtUtil {
                 .compact();
     }
 
+    public Long getId(String token) {
+        return getClaims(token).get("id", Long.class);
+    }
+
     public String getEmail(String token) {
         return getClaims(token).getSubject();
     }

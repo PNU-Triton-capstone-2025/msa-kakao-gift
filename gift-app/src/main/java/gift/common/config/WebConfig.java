@@ -1,8 +1,8 @@
 package gift.common.config;
 
 import gift.auth.AdminInterceptor;
-import gift.auth.LoginInterceptor;
 import gift.auth.LoginArgumentResolver;
+import gift.auth.LoginInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -16,7 +16,8 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
-    private final AdminInterceptor adminInterceptor;
+
+    private final AdminInterceptor  adminInterceptor;
     private final LoginArgumentResolver loginArgumentResolver;
     @Value("${spring.front.domain}")
     private String frontDomain;
@@ -33,19 +34,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .order(1)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/api/members/register",
-                        "/api/members/register/admin",
-                        "/api/members/login",
-                        "/members/register",
-                        "/members/login",
-                        "/members/login/oauth2/code/kakao",
                         "/",
-                        "/h2-console/**",
-                        "/css/**",
-                        "/js/**",
-                        "/images/**",
-                        "/error",
-                        "/favicon.ico"
+                        "/members/login",
+                        "/members/register",
+                        "/members/login/oauth2/code/kakao",
+                        "/api/members/login",
+                        "/api/members/register",
+                        "/css/**", "/js/**", "/error", "/favicon.ico"
                 );
 
         registry.addInterceptor(adminInterceptor)

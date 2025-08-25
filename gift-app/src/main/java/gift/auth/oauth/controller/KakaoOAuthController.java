@@ -1,6 +1,5 @@
 package gift.auth.oauth.controller;
 
-import gift.auth.oauth.service.KakaoOAuthService;
 import gift.member.dto.MemberTokenResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,22 +7,28 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestClient;
 
 @Controller
 @RequestMapping("/members/login")
 public class KakaoOAuthController {
-    private final KakaoOAuthService oAuthService;
 
-    public KakaoOAuthController(KakaoOAuthService oAuthService){
-        this.oAuthService = oAuthService;
+    private final RestClient userApiClient;
+
+    public KakaoOAuthController(RestClient.Builder builder) {
+        userApiClient = builder
+                .baseUrl("http://localhost:8084")
+                .build();
     }
 
     @GetMapping("/oauth2/code/kakao")
-    public String kakaoRedirect(@RequestParam("code") String code, HttpServletResponse response){
-        MemberTokenResponse kakaoToken = oAuthService.login(code);
+    public String kakaoRedirect(@RequestParam("code") String code, HttpServletResponse reponse) {
+        MemberTokenResponse tokenResponse = userApiClient.get()
+                .uri("/members/login/oauth2/code/kakao?code={code}", code)
+                .retrieve()
+                .body(MemberTokenResponse.class);
 
-        addTokenCookie(response, kakaoToken.token());
-
+        addTokenCookie(reponse, tokenResponse.token());
         return "redirect:/products";
     }
 

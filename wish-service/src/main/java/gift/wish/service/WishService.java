@@ -11,13 +11,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 public class WishService {
@@ -78,6 +75,11 @@ public class WishService {
         checkValidWishAndMember(memberId, wishId);
 
         wishRepository.deleteById(wishId);
+    }
+
+    @Transactional
+    public void deleteWishByMemberAndProductId(Long memberId, Long productId) {
+        wishRepository.deleteByMemberIdAndProductId(memberId, productId);
     }
 
     private Wish checkValidWishAndMember(Long memberId, Long wishId){
