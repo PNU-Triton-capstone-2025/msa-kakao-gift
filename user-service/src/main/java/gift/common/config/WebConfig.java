@@ -3,10 +3,8 @@ package gift.common.config;
 import gift.auth.AdminInterceptor;
 import gift.auth.LoginArgumentResolver;
 import gift.auth.LoginInterceptor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,8 +16,6 @@ public class WebConfig implements WebMvcConfigurer {
     private final LoginInterceptor loginInterceptor;
     private final AdminInterceptor adminInterceptor;
     private final LoginArgumentResolver loginArgumentResolver;
-    @Value("${spring.front.domain}")
-    private String frontDomain;
 
     public WebConfig(LoginInterceptor loginInterceptor, AdminInterceptor adminInterceptor, LoginArgumentResolver loginArgumentResolver) {
         this.loginInterceptor = loginInterceptor;
@@ -36,12 +32,14 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/members/register",
                         "/api/members/register/admin",
                         "/api/members/login",
-                        "/members/login/oauth2/code/kakao"
+                        "/members/login/oauth2/code/kakao",
+                        "/",
+                        "/h2-console/**"
                 );
 
         registry.addInterceptor(adminInterceptor)
                 .order(2)
-                .addPathPatterns("/api/admin/**");
+                .addPathPatterns("/admin/**", "/api/admin/**");
     }
 
     @Override
