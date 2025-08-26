@@ -6,5 +6,6 @@ public record MemberTokenRequest (
         Long id,
         String email,
         String password,
-        RoleType role
+        RoleType role,
+        String token
 ) {}

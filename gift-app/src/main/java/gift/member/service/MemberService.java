@@ -2,9 +2,9 @@ package gift.member.service;
 
 import gift.member.dto.MemberLoginRequest;
 import gift.member.dto.MemberRegisterRequest;
-import gift.member.dto.MemberTokenRequest;
 import gift.member.dto.MemberTokenResponse;
 import gift.member.dto.MemberUpdateRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -13,9 +13,9 @@ public class MemberService {
 
     private final RestClient restClient;
 
-    public MemberService(RestClient.Builder builder) {
+    public MemberService(RestClient.Builder builder, @Value("${api.gateway.uri}") String gatewayUri) {
         this.restClient = builder
-                .baseUrl("http://localhost:8085")
+                .baseUrl(gatewayUri)
                 .build();
     }
 
@@ -51,19 +51,19 @@ public class MemberService {
                 .body(MemberTokenResponse.class);
     }
 
-    public void updatePassword(MemberTokenRequest memberTokenRequest, MemberUpdateRequest request) {
+    public void updatePassword(String token, MemberUpdateRequest request) {
         restClient.patch()
                 .uri("/api/members/edit")
-                .header("Authorization", "Bearer " + memberTokenRequest.token())
+                .header("Authorization", "Bearer " + token)
                 .body(request)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void deleteMember(MemberTokenRequest memberTokenRequest, String password) {
-        restClient.post()
+    public void deleteMember(String token, String password) {
+        restClient.delete()
                 .uri("/api/members/delete?password={password}", password)
-                .header("Authorization", "Bearer " + memberTokenRequest.token())
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .toBodilessEntity();
     }

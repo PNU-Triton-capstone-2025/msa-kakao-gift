@@ -6,6 +6,7 @@ import gift.wish.dto.WishInfo;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishResponse;
 import gift.wish.repository.WishRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,10 +23,12 @@ public class WishService {
     private final WishRepository wishRepository;
     private final RestClient productRestClient;
 
-    public WishService(WishRepository wishRepository, RestClient.Builder restClientBuilder) {
+    public WishService(WishRepository wishRepository,
+                       RestClient.Builder restClientBuilder,
+                       @Value("${service.product.uri}") String productUri) {
         this.wishRepository = wishRepository;
         this.productRestClient = restClientBuilder
-                .baseUrl("http://localhost:8081")
+                .baseUrl(productUri)
                 .build();
     }
 

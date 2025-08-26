@@ -2,6 +2,7 @@ package gift.product.service;
 
 import gift.product.dto.ProductOptionRequestDto;
 import gift.product.dto.ProductOptionResponseDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,9 @@ public class ProductOptionService {
 
     private final RestClient restClient;
 
-    public ProductOptionService(RestClient.Builder restClientBuilder) {
+    public ProductOptionService(RestClient.Builder restClientBuilder, @Value("${api.gateway.uri}") String gatewayUri) {
         this.restClient = restClientBuilder
-            .baseUrl("http://localhost:8085")
+            .baseUrl(gatewayUri)
             .build();
     }
 

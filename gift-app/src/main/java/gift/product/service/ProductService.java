@@ -8,6 +8,7 @@ import gift.product.dto.ProductOptionResponseDto;
 import gift.product.dto.ProductRequestDto;
 import gift.product.dto.ProductResponseDto;
 import gift.product.exception.ProductNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,9 +24,9 @@ public class ProductService {
 
     private final RestClient restClient;
 
-    public ProductService(RestClient.Builder restClientBuilder) {
+    public ProductService(RestClient.Builder restClientBuilder, @Value("${api.gateway.uri}") String gatewayUri) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8085") // 환경변수로 바꿀 예정
+                .baseUrl(gatewayUri)
                 .build();
     }
 

@@ -14,11 +14,10 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import gift.auth.AuthUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/members")
@@ -95,21 +94,34 @@ public class MemberController {
     }
 
     @PostMapping("/edit")
-    public String editPassword(@Login MemberTokenRequest memberTokenRequest, @Valid @ModelAttribute("member") MemberUpdateRequest request, BindingResult bindingResult) {
+    public String editPassword(
+            @Login MemberTokenRequest memberTokenRequest,
+            @Valid @ModelAttribute("member") MemberUpdateRequest request,
+            HttpServletRequest httpServletRequest,
+            BindingResult bindingResult) {
+
         if (bindingResult.hasErrors()) {
             return "members/edit-password-form";
         }
 
-        memberService.updatePassword(memberTokenRequest, request);
+        String token = AuthUtil.extractToken(httpServletRequest);
+
+        memberService.updatePassword(token, request);
 
         return "redirect:/members/mypage";
     }
 
-    @PostMapping("/delete")
-    public String deleteMember(@Login MemberTokenRequest memberTokenRequest, @RequestParam String password, HttpServletResponse response) {
-        memberService.deleteMember(memberTokenRequest, password);
-        expireTokenCookie(response);
+    @DeleteMapping("/delete")
+    public String deleteMember(
+            HttpServletRequest httpServletRequest,
+            @RequestParam String password,
+            HttpServletResponse response) {
 
+        String token = AuthUtil.extractToken(httpServletRequest);
+
+        memberService.deleteMember(token, password);
+
+        expireTokenCookie(response);
         return "redirect:/";
     }
 
