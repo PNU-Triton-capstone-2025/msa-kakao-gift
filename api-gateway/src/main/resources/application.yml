@@ -25,33 +25,33 @@ spring:
       routes:
         # 공개 경로: 로그인, 회원가입 API는 필터를 적용하지 않습니다.
         - id: user-service-public
-          uri: ${SERVICE_USER_URI:http://localhost:8084}
+          uri: ${SERVICE_USER_URI}
           predicates:
             - Path=/api/members/login/**, /api/members/register/**
 
         - id: user-service
-          uri: ${SERVICE_USER_URI:http://localhost:8084}
+          uri: ${SERVICE_USER_URI}
           predicates:
             - Path=/api/members/**
           filters:
             - AuthenticationFilter
 
         - id: product-service
-          uri: ${SERVICE_PRODUCT_URI:http://localhost:8081}
+          uri: ${SERVICE_PRODUCT_URI}
           predicates:
             - Path=/api/products/**, /api/admin/products/**
           filters:
             - AuthenticationFilter
 
         - id: wish-service
-          uri: ${SERVICE_WISH_URI:http://localhost:8082}
+          uri: ${SERVICE_WISH_URI}
           predicates:
             - Path=/api/wishes/**
           filters:
             - AuthenticationFilter
 
         - id: order-service
-          uri: ${SERVICE_ORDER_URI:http://localhost:8083}
+          uri: ${SERVICE_ORDER_URI}
           predicates:
             - Path=/api/orders/**
           filters:
