@@ -1,6 +1,5 @@
 package gift.auth.oauth;
 
-import gift.auth.oauth.dto.KakaoMessageDto;
 import gift.auth.oauth.dto.KakaoTokenResponseDto;
 import gift.auth.oauth.dto.KakaoUserInfoResponseDto;
 import gift.auth.oauth.exception.KakaoApiFailedException;
@@ -63,25 +62,5 @@ public class KakaoApiClient {
                     throw new KakaoApiFailedException(errorMsg, response.getStatusCode());
                 })
                 .body(KakaoUserInfoResponseDto.class);
-    }
-
-    public void sendMessageToMe(String accessToken, KakaoMessageDto messageDto) {
-        String templateJson = jsonUtil.toJson(messageDto);
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-
-        body.add("template_object", templateJson);
-
-        apiClient.post()
-                .uri("/v2/api/talk/memo/default/send")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(body)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (request, response) -> {
-                    String errorMsg = "카카오 메시지 API 호출 실패. 상태 코드: " + response.getStatusCode();
-                    throw new KakaoApiFailedException(errorMsg, response.getStatusCode());
-                })
-                .toBodilessEntity();
     }
 }

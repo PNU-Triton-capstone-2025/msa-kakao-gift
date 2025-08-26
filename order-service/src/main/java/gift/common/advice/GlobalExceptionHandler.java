@@ -1,5 +1,6 @@
 package gift.common.advice;
 
+import gift.kakao.exception.KakaoApiFailedException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleRuntimeException(
             RuntimeException ex
     ) {
+        return makeErrorResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(KakaoApiFailedException.class)
+    public ResponseEntity<Map<String, Object>> handleKakaoApiFailedException(KakaoApiFailedException ex) {
         return makeErrorResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

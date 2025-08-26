@@ -86,4 +86,16 @@ public class MemberService {
 
         memberRepository.deleteById(memberId);
     }
+
+    @Transactional(readOnly = true)
+    public Member getKakaoMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!member.isKakaoUser()) {
+            throw new IllegalArgumentException("카카오로 로그인이 되어있지 않습니다.");
+        }
+
+        return member;
+    }
 }

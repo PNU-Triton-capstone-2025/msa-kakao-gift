@@ -1,10 +1,13 @@
 package gift.order.service;
 
+import gift.kakao.KakaoMessageClient;
+import gift.kakao.dto.KakaoMessageDto;
 import gift.order.domain.Order;
 import gift.order.dto.OrderRequestDto;
 import gift.order.dto.OrderResponseDto;
 import gift.order.repository.OrderRepository;
 import gift.product.dto.ProductOptionDetailDto;
+import gift.product.dto.ProductResponseDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,22 +22,25 @@ public class OrderService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
+    private final KakaoMessageClient kakaoMessageClient;
     private final RestClient productRestClient;
     private final RestClient wishRestClient;
+    private final RestClient userRestClient;
+    private final String productBaseUrl;
 
     public OrderService(OrderRepository orderRepository,
                         RestClient.Builder restClientBuilder,
+                        KakaoMessageClient kakaoMessageClient,
                         @Value("${service.product.uri}") String productUri,
-                        @Value("${service.wish.uri}") String wishUri) {
+                        @Value("${service.wish.uri}") String wishUri,
+                        @Value("${service.user.uri}") String userUri,
+                        @Value("${spring.front.domain}") String frontDomain) {
         this.orderRepository = orderRepository;
-        this.productRestClient = restClientBuilder
-                .clone()
-                .baseUrl(productUri)
-                .build();
-        this.wishRestClient = restClientBuilder
-                .clone()
-                .baseUrl(wishUri)
-                .build();
+        this.kakaoMessageClient = kakaoMessageClient;
+        this.productRestClient = restClientBuilder.clone().baseUrl(productUri).build();
+        this.wishRestClient = restClientBuilder.clone().baseUrl(wishUri).build();
+        this.userRestClient = restClientBuilder.clone().baseUrl(userUri).build();
+        this.productBaseUrl = frontDomain;
     }
 
     @Transactional
@@ -48,9 +54,28 @@ public class OrderService {
 
         deleteWish(memberId, productId);
 
-        // TODO: 카카오 메시지 발송 로직은 향후 'notification-service'로 분리될 예정입니다.
+        String kakaoAccessToken = getKakaoAccessToken(memberId);
+
+        if (kakaoAccessToken != null) {
+            ProductResponseDto product = getProductInfo(productId);
+
+            KakaoMessageDto message = KakaoMessageDto.createCommerceTemplate(product, this.productBaseUrl);
+            kakaoMessageClient.sendMessageToMe(kakaoAccessToken, message);
+        }
 
         return OrderResponseDto.from(order);
+    }
+
+    private String getKakaoAccessToken(Long memberId) {
+        try {
+            var response = userRestClient.get()
+                    .uri("/api/members/{id}/kakao-token", memberId)
+                    .retrieve()
+                    .body(Map.class);
+            return (response != null) ? (String) response.get("accessToken") : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private Long getProductIdForOption(Long optionId) {
@@ -68,6 +93,13 @@ public class OrderService {
             log.error("product-service에서 옵션 정보 조회 실패 - optionId: {}", optionId, e);
             throw new IllegalStateException("상품 정보를 조회하는 데 실패했습니다.", e);
         }
+    }
+
+    private ProductResponseDto getProductInfo(Long productId) {
+        return productRestClient.get()
+                .uri("/api/products/{id}", productId)
+                .retrieve()
+                .body(ProductResponseDto.class);
     }
 
     private void subtractProductStock(Long optionId, Integer quantity) {

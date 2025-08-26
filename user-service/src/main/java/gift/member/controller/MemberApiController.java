@@ -1,5 +1,6 @@
 package gift.member.controller;
 
+import gift.member.domain.Member;
 import gift.member.dto.MemberLoginRequest;
 import gift.member.dto.MemberRegisterRequest;
 import gift.member.dto.MemberTokenResponse;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/members")
 public class MemberApiController {
@@ -18,6 +21,14 @@ public class MemberApiController {
 
     public MemberApiController(MemberService memberService) {
         this.memberService = memberService;
+    }
+
+    @GetMapping("/{id}/kakao-token")
+    public ResponseEntity<Map<String, String>> getKakaoAccessToken(@PathVariable("id") Long id) {
+        Member member = memberService.getKakaoMember(id);
+
+        Map<String, String> response = Map.of("accessToken", member.getKakaoAccessToken());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
