@@ -13,6 +13,7 @@ import gift.wish.dto.WishUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -46,7 +47,7 @@ public class WishService {
         return new Wish(member, product, wishResponse.quantity());
     }
 
-    public Page<WishListResponse> getWishes(MemberTokenRequest memberTokenRequest, Pageable pageable) {
+    public Page<WishListResponse> getWishes(Pageable pageable, String token) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {
                     uriBuilder.path("/api/wishes")
@@ -57,7 +58,7 @@ public class WishService {
                     );
                     return uriBuilder.build();
                 })
-                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .body(new org.springframework.core.ParameterizedTypeReference<
                         PageResponse<WishListResponse>>() {});
@@ -71,28 +72,28 @@ public class WishService {
         );
     }
 
-    public void addWish(MemberTokenRequest memberTokenRequest, Long productId) {
+    public void addWish(WishRequest request, String token) {
         restClient.post()
                 .uri("/api/wishes")
-                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
-                .body(new WishRequest(productId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(request)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void updateQuantity(MemberTokenRequest memberTokenRequest, Long wishId, Integer quantity) {
+    public void updateQuantity(Long wishId, WishUpdateRequest request, String token) {
         restClient.patch()
                 .uri("/api/wishes/{wishId}", wishId)
-                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
-                .body(new WishUpdateRequest(quantity))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(request)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void deleteWish(MemberTokenRequest memberTokenRequest, Long wishId) {
+    public void deleteWish(Long wishId, String token) {
         restClient.delete()
                 .uri("/api/wishes/{wishId}", wishId)
-                .header("X-Member-Id", String.valueOf(memberTokenRequest.id()))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toBodilessEntity();
     }
