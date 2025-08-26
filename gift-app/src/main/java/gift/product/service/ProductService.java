@@ -61,7 +61,7 @@ public class ProductService {
     public Page<Product> getProducts(Pageable pageable, String token) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {
-                    uriBuilder.path("/api/admin/products")
+                    uriBuilder.path("/api/products")
                             .queryParam("page", pageable.getPageNumber())
                             .queryParam("size", pageable.getPageSize());
                     pageable.getSort().forEach(o ->
@@ -85,7 +85,7 @@ public class ProductService {
 
     public Product getProduct(Long id) {
         ProductResponseDto responseDto = restClient.get()
-                .uri("/api/admin/products/{id}", id)
+                .uri("/api/products/{id}", id)
                 .retrieve()
                 .body(ProductResponseDto.class);
 
