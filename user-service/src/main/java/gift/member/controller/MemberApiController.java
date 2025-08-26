@@ -3,14 +3,13 @@ package gift.member.controller;
 import gift.member.dto.MemberLoginRequest;
 import gift.member.dto.MemberRegisterRequest;
 import gift.member.dto.MemberTokenResponse;
+import gift.member.dto.MemberTokenRequest;
+import gift.member.dto.MemberUpdateRequest;
 import gift.member.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/members")
@@ -42,4 +41,21 @@ public class MemberApiController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/edit")
+    public ResponseEntity<Void> update(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @Valid @RequestBody MemberUpdateRequest memberUpdateRequest) {
+
+        memberService.updatePassword(memberId, memberUpdateRequest);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> delete(
+            @RequestHeader("X-Member-Id") Long memberId,
+            @RequestParam("password") String password) {
+
+        memberService.deleteMember(memberId, password);
+        return ResponseEntity.noContent().build();
+    }
 }
