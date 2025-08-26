@@ -1,4 +1,4 @@
-package gift.common;
+package gift.kakao;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

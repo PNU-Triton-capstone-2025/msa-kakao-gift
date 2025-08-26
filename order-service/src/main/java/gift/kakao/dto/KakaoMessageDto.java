@@ -1,7 +1,7 @@
 package gift.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gift.product.domain.Product;
+import gift.product.dto.ProductResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 
 public record KakaoMessageDto(
@@ -30,39 +30,33 @@ public record KakaoMessageDto(
     public record Commerce(
             @JsonProperty("regular_price")
             Integer regularPrice
-    ) {
-
-    }
+    ) {}
 
     public record Button(
         String title,
         Link link
-    ) {
-
-    }
+    ) {}
 
     public record Link(
         @JsonProperty("web_url")
         String webUrl,
         @JsonProperty("mobile_web_url")
         String mobileWebUrl
-    ) {
+    ) {}
 
-    }
-
-    public static KakaoMessageDto createCommerceTemplate(Product product, @Value("${service.product.uri}") String productUri) {
-        String productUrl = productUri + "/products/" + product.getId();
+    public static KakaoMessageDto createCommerceTemplate(ProductResponseDto product, @Value("${service.product.uri}") String productUri) {
+        String productUrl = productUri + "/products/" + product.id();
 
         Content content = new Content(
-                product.getName(),
-                product.getImageUrl(),
+                product.name(),
+                product.imageUrl(),
                 640,
                 640,
                 new Link(productUrl, productUrl)
         );
 
         Commerce commerce = new Commerce(
-                product.getPrice()
+                product.price()
         );
 
         Button[] buttons = new Button[]{

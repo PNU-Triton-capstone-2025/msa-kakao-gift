@@ -1,4 +1,4 @@
-package gift.auth.oauth.exception;
+package gift.kakao.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
