@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import org.slf4j.Logger; // Logger 임포트
+import org.slf4j.LoggerFactory; // LoggerFactory 임포트
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -22,10 +25,12 @@ import java.util.Objects;
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
     private final SecretKey secretKey;
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationFilter.class);
     private final List<String> publicPaths = List.of(
             "/api/members/login",
             "/api/members/register",
-            "/api/members/register/admin"
+            "/api/members/register/admin",
+            "/api/members/login/oauth/kakao"
     );
 
     public static class Config {}
@@ -40,6 +45,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
+
+            log.info("Gateway AuthenticationFilter received request for path: {}", path);
 
             // JWT 검증이 필요 없으면 바로 통과
             if (isPublicPath(path)) {
@@ -74,7 +81,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     }
 
     private boolean isPublicPath(String path) {
-        return publicPaths.stream().anyMatch(path::startsWith);
+        return path.startsWith("/api/members/login") || path.startsWith("/api/members/register");
     }
 
     private boolean isJwtValid(String jwt) {
