@@ -13,6 +13,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -27,7 +28,7 @@ public class ProductService {
 
     public ProductService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8081") // 환경변수로 바꿀 예정
+                .baseUrl("http://localhost:8085") // 환경변수로 바꿀 예정
                 .build();
     }
 
@@ -57,7 +58,7 @@ public class ProductService {
                 .toBodilessEntity();
     }
 
-    public Page<Product> getProducts(Pageable pageable) {
+    public Page<Product> getProducts(Pageable pageable, String token) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {
                     uriBuilder.path("/api/admin/products")
@@ -68,6 +69,7 @@ public class ProductService {
                     );
                     return uriBuilder.build();
                 })
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .body(new ParameterizedTypeReference<
                         PageResponse<ProductResponseDto>>() {});

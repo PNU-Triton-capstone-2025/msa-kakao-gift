@@ -9,7 +9,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class AuthUtil {
-    static String extractToken(HttpServletRequest request) {
+    public static String extractToken(HttpServletRequest request) {
         if (isApiRequest(request)) {
             String authHeader = request.getHeader("Authorization");
             if(authHeader != null && authHeader.startsWith("Bearer ")) {

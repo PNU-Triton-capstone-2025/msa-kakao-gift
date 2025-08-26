@@ -16,7 +16,7 @@ public class ProductOptionService {
 
     public ProductOptionService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-            .baseUrl("http://localhost:8081")
+            .baseUrl("http://localhost:8080")
             .build();
     }
 

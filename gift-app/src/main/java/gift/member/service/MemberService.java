@@ -15,7 +15,7 @@ public class MemberService {
 
     public MemberService(RestClient.Builder builder) {
         this.restClient = builder
-                .baseUrl("http://localhost:8084")
+                .baseUrl("http://localhost:8085")
                 .build();
     }
 

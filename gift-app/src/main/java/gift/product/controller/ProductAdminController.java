@@ -1,5 +1,6 @@
 package gift.product.controller;
 
+import gift.auth.AuthUtil;
 import gift.auth.Login;
 import gift.common.enums.ProductSortProperty;
 import gift.common.validation.ValidSort;
@@ -9,6 +10,7 @@ import gift.product.dto.ProductEditRequestDto;
 import gift.product.dto.ProductInfoDto;
 import gift.product.dto.ProductRequestDto;
 import gift.product.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +40,11 @@ public class ProductAdminController {
     public String products(
             @ValidSort(enumClass = ProductSortProperty.class)
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        Page<ProductInfoDto> products = productService.getProducts(pageable)
+        String token = AuthUtil.extractToken(request);
+        Page<ProductInfoDto> products = productService.getProducts(pageable, token)
                 .map(product -> ProductInfoDto.productFrom(product));
 
         model.addAttribute("products", products);

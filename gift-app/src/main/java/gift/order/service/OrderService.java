@@ -13,7 +13,7 @@ public class OrderService {
 
     public OrderService(RestClient.Builder restClientBuilder) {
         restClient = restClientBuilder
-                .baseUrl("http://localhost:8083")
+                .baseUrl("http://localhost:8085")
                 .build();
     }
 

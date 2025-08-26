@@ -25,7 +25,7 @@ public class WishService {
     public WishService(RestClient.Builder restClientBuilder, ProductService productService) {
         this.productService = productService;
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8082")
+                .baseUrl("http://localhost:8085")
                 .build();
     }
 
