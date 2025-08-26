@@ -23,6 +23,12 @@ spring:
             maxAge: 3600
 
       routes:
+        # 공개 경로: 로그인, 회원가입 API는 필터를 적용하지 않습니다.
+        - id: user-service-public
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/members/login/**, /api/members/register/**
+
         - id: user-service
           uri: http://localhost:8084
           predicates:
