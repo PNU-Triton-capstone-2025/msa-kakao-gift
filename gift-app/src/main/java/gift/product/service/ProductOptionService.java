@@ -3,6 +3,7 @@ package gift.product.service;
 import gift.product.dto.ProductOptionRequestDto;
 import gift.product.dto.ProductOptionResponseDto;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -16,22 +17,35 @@ public class ProductOptionService {
 
     public ProductOptionService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-            .baseUrl("http://localhost:8080")
+            .baseUrl("http://localhost:8085")
             .build();
     }
 
     @Transactional(readOnly = true)
-    public List<ProductOptionResponseDto> getProductOptions(Long productId) {
-        return restClient.get().uri("/api/products/{productId}/options", productId).retrieve().body(new ParameterizedTypeReference<>() {});
+    public List<ProductOptionResponseDto> getProductOptions(Long productId, String token) {
+        return restClient.get()
+                .uri("/api/products/{productId}/options", productId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     @Transactional
-    public void addNewOption(Long productId, ProductOptionRequestDto optionRequestDto){
-        restClient.post().uri("/api/products/{productId}/options", productId).body(optionRequestDto).retrieve().toBodilessEntity();
+    public void addNewOption(Long productId, ProductOptionRequestDto optionRequestDto, String token){
+        restClient.post()
+                .uri("/api/products/{productId}/options", productId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(optionRequestDto)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     @Transactional
-    public void deleteOption(Long optionId) {
-        restClient.delete().uri("/api/products/options/{optionId}", optionId).retrieve().toBodilessEntity();
+    public void deleteOption(Long optionId, String token) {
+        restClient.delete()
+                .uri("/api/products/options/{optionId}", optionId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .toBodilessEntity();
     }
 }

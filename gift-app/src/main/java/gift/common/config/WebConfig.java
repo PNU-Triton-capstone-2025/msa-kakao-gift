@@ -38,7 +38,7 @@ public class WebConfig implements WebMvcConfigurer {
                         // API 경로는 Gateway가 처리하므로 전부 제외
                         "/api/**",
 
-                        // 기존의 공개 View 경로는 그대로 유지
+                        // 공개 View 경로는 그대로 유지
                         "/",
                         "/members/login",
                         "/members/register",
