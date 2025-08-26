@@ -7,6 +7,7 @@ import gift.order.repository.OrderRepository;
 import gift.product.dto.ProductOptionDetailDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
@@ -21,15 +22,18 @@ public class OrderService {
     private final RestClient productRestClient;
     private final RestClient wishRestClient;
 
-    public OrderService(OrderRepository orderRepository, RestClient.Builder restClientBuilder) {
+    public OrderService(OrderRepository orderRepository,
+                        RestClient.Builder restClientBuilder,
+                        @Value("${service.product.uri}") String productUri,
+                        @Value("${service.wish.uri}") String wishUri) {
         this.orderRepository = orderRepository;
         this.productRestClient = restClientBuilder
                 .clone()
-                .baseUrl("http://localhost:8081")
+                .baseUrl(productUri)
                 .build();
         this.wishRestClient = restClientBuilder
                 .clone()
-                .baseUrl("http://localhost:8082")
+                .baseUrl(wishUri)
                 .build();
     }
 
