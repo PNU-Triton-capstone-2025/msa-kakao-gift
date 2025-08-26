@@ -61,7 +61,6 @@ public class ProductOptionService {
         ProductOption option = productOptionRepository.findById(optionId)
                 .orElseThrow(() -> new ProductNotFoundException("옵션을 찾을 수 없습니다. ID: " + optionId));
 
-        Product product = option.getProduct();
-        return new ProductOptionDetailDto(option.getId(), product.getId(), product.getName(), option.getName());
+        return ProductOptionDetailDto.from(option);
     }
 }
