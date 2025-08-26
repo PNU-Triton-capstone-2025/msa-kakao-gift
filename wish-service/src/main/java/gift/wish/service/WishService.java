@@ -82,6 +82,14 @@ public class WishService {
         wishRepository.deleteByMemberIdAndProductId(memberId, productId);
     }
 
+    @Transactional(readOnly = true)
+    public WishResponse getWishWithProductDetails(Long wishId) {
+        Wish wish = wishRepository.findById(wishId)
+                .orElseThrow(() -> new NoSuchElementException("해당 위시 항목을 찾을 수 없습니다."));
+
+        return new WishResponse(wish.getId(), wish.getProductId(), wish.getQuantity());
+    }
+
     private Wish checkValidWishAndMember(Long memberId, Long wishId){
         Wish wish = wishRepository.findById(wishId)
                 .orElseThrow(() -> new NoSuchElementException("해당 위시 항목을 찾을 수 없습니다."));
