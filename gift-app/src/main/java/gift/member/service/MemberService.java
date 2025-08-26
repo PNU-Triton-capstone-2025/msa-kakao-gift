@@ -2,9 +2,9 @@ package gift.member.service;
 
 import gift.member.dto.MemberLoginRequest;
 import gift.member.dto.MemberRegisterRequest;
-import gift.member.dto.MemberTokenRequest;
 import gift.member.dto.MemberTokenResponse;
 import gift.member.dto.MemberUpdateRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -13,9 +13,9 @@ public class MemberService {
 
     private final RestClient restClient;
 
-    public MemberService(RestClient.Builder builder) {
+    public MemberService(RestClient.Builder builder, @Value("${api.gateway.uri}") String gatewayUri) {
         this.restClient = builder
-                .baseUrl("http://localhost:8080")
+                .baseUrl(gatewayUri)
                 .build();
     }
 

@@ -2,6 +2,7 @@ package gift.order.service;
 
 import gift.order.dto.OrderRequestDto;
 import gift.order.dto.OrderResponseDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -11,9 +12,9 @@ public class OrderService {
 
     private final RestClient restClient;
 
-    public OrderService(RestClient.Builder restClientBuilder) {
+    public OrderService(RestClient.Builder restClientBuilder, @Value("${api.gateway.uri}") String gatewayUri) {
         restClient = restClientBuilder
-                .baseUrl("http://localhost:8080")
+                .baseUrl(gatewayUri)
                 .build();
     }
 

@@ -5,6 +5,7 @@ import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishRequest;
 import gift.wish.dto.WishResponse;
 import gift.wish.dto.WishUpdateRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,9 +18,9 @@ public class WishService {
 
     private final RestClient restClient;
 
-    public WishService(RestClient.Builder restClientBuilder) {
+    public WishService(RestClient.Builder restClientBuilder, @Value("${api.gateway.uri}") String gatewayUri) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8080")
+                .baseUrl(gatewayUri)
                 .build();
     }
 
