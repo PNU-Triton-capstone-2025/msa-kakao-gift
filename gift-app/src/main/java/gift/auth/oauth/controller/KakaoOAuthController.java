@@ -17,7 +17,7 @@ public class KakaoOAuthController {
 
     public KakaoOAuthController(RestClient.Builder builder) {
         userApiClient = builder
-                .baseUrl("http://localhost:8085")
+                .baseUrl("http://localhost:8080")
                 .build();
     }
 

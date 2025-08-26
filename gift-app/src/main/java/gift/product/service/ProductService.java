@@ -25,7 +25,7 @@ public class ProductService {
 
     public ProductService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8085") // 환경변수로 바꿀 예정
+                .baseUrl("http://localhost:8080")
                 .build();
     }
 

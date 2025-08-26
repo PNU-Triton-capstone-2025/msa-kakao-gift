@@ -19,7 +19,7 @@ public class WishService {
 
     public WishService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8085")
+                .baseUrl("http://localhost:8080")
                 .build();
     }
 
