@@ -1,7 +1,6 @@
 package gift.product.service;
 
 import gift.common.page.PageResponse;
-import gift.member.dto.MemberTokenRequest;
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
 import gift.product.dto.ProductEditRequestDto;
@@ -13,12 +12,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -27,15 +25,16 @@ public class ProductService {
 
     public ProductService(RestClient.Builder restClientBuilder) {
         this.restClient = restClientBuilder
-                .baseUrl("http://localhost:8081") // 환경변수로 바꿀 예정
+                .baseUrl("http://localhost:8085") // 환경변수로 바꿀 예정
                 .build();
     }
 
-    public Product getProductWithOptions(Long id) {
-        Product product = getProduct(id);
+    public Product getProductWithOptions(Long productId, String token) {
+        Product product = getProduct(productId, token);
 
         List<ProductOptionResponseDto> optionsDto = restClient.get()
-                .uri("/api/products/{productId}/options", id)
+                .uri("/api/products/{productId}/options", productId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
 
@@ -48,19 +47,19 @@ public class ProductService {
         return product;
     }
 
-    public void saveProduct(ProductRequestDto requestDto, MemberTokenRequest memberToken) {
+    public void saveProduct(ProductRequestDto requestDto, String token) {
         restClient.post()
                 .uri("/api/admin/products")
-                .header("X-Member-Role", memberToken.role().name())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .body(requestDto)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public Page<Product> getProducts(Pageable pageable) {
+    public Page<Product> getProducts(Pageable pageable, String token) {
         var pageResp = restClient.get()
                 .uri(uriBuilder -> {
-                    uriBuilder.path("/api/admin/products")
+                    uriBuilder.path("/api/products")
                             .queryParam("page", pageable.getPageNumber())
                             .queryParam("size", pageable.getPageSize());
                     pageable.getSort().forEach(o ->
@@ -68,6 +67,7 @@ public class ProductService {
                     );
                     return uriBuilder.build();
                 })
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .body(new ParameterizedTypeReference<
                         PageResponse<ProductResponseDto>>() {});
@@ -81,9 +81,10 @@ public class ProductService {
         return new PageImpl<>(content, pageable, pageResp.totalElements());
     }
 
-    public Product getProduct(Long id) {
+    public Product getProduct(Long id, String token) {
         ProductResponseDto responseDto = restClient.get()
-                .uri("/api/admin/products/{id}", id)
+                .uri("/api/products/{id}", id)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .body(ProductResponseDto.class);
 
@@ -91,19 +92,19 @@ public class ProductService {
         return new Product(responseDto.id(), responseDto.name(), responseDto.price(), responseDto.imageUrl());
     }
 
-    public void update(Long id, ProductEditRequestDto requestDto, MemberTokenRequest memberToken) {
+    public void update(Long id, ProductEditRequestDto requestDto, String token) {
         restClient.put()
                 .uri("/api/admin/products/{id}", id)
-                .header("X-Member-Role", memberToken.role().name())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .body(requestDto)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void delete(Long id, MemberTokenRequest memberToken) {
+    public void delete(Long id, String token) {
         restClient.delete()
                 .uri("/api/admin/products/{id}", id)
-                .header("X-Member-Role", memberToken.role().name())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .toBodilessEntity();
     }

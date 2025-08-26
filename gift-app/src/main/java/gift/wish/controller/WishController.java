@@ -1,5 +1,6 @@
 package gift.wish.controller;
 
+import gift.auth.AuthUtil;
 import gift.auth.Login;
 import gift.common.enums.WishSortProperty;
 import gift.common.validation.ValidSort;
@@ -8,6 +9,7 @@ import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishRequest;
 import gift.wish.dto.WishUpdateRequest;
 import gift.wish.service.WishService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,33 +35,36 @@ public class WishController {
 
     @GetMapping
     public String getWishes(
-            @Login MemberTokenRequest memberTokenRequest,
             @ValidSort(enumClass = WishSortProperty.class)
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        Page<WishListResponse> wishes = wishService.getWishes(memberTokenRequest, pageable);
+        String token = AuthUtil.extractToken(request);
+        Page<WishListResponse> wishes = wishService.getWishes(pageable, token);
 
         model.addAttribute("wishes", wishes);
         return "wishes/wishes";
     }
 
     @PostMapping("/add")
-    public String addWish(@Login MemberTokenRequest memberTokenRequest, @ModelAttribute WishRequest request) {
-        wishService.addWish(memberTokenRequest, request.productId());
+    public String addWish(HttpServletRequest request, @ModelAttribute WishRequest wishRequest) {
+        String token = AuthUtil.extractToken(request);
+        wishService.addWish(wishRequest, token);
         return "redirect:/wishes";
     }
 
     @PostMapping("/update/{wishId}")
-    public String updateWish(@Login MemberTokenRequest memberTokenRequest, @PathVariable Long wishId, @ModelAttribute WishUpdateRequest request){
-        wishService.updateQuantity(memberTokenRequest, wishId, request.quantity());
-
+    public String updateWish(HttpServletRequest request, @PathVariable Long wishId, @ModelAttribute WishUpdateRequest wishUpdateRequest){
+        String token = AuthUtil.extractToken(request);
+        wishService.updateQuantity(wishId, wishUpdateRequest, token);
         return "redirect:/wishes";
     }
 
     @PostMapping("/delete/{wishId}")
-    public String deleteWish(@Login MemberTokenRequest memberTokenRequest, @PathVariable("wishId") Long wishId) {
-        wishService.deleteWish(memberTokenRequest, wishId);
+    public String deleteWish(HttpServletRequest request, @PathVariable("wishId") Long wishId) {
+        String token = AuthUtil.extractToken(request);
+        wishService.deleteWish(wishId, token);
         return "redirect:/wishes";
     }
 }

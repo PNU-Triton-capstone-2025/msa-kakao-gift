@@ -16,9 +16,9 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
-
-    private final AdminInterceptor  adminInterceptor;
+    private final AdminInterceptor adminInterceptor;
     private final LoginArgumentResolver loginArgumentResolver;
+
     @Value("${spring.front.domain}")
     private String frontDomain;
 
@@ -30,22 +30,26 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 1. 로그인 인터셉터: 웹 페이지만 보호
         registry.addInterceptor(loginInterceptor)
                 .order(1)
-                .addPathPatterns("/**")
+                .addPathPatterns("/**") // 모든 경로에 적용하되,
                 .excludePathPatterns(
+                        // API 경로는 Gateway가 처리하므로 전부 제외
+                        "/api/**",
+
+                        // 공개 View 경로는 그대로 유지
                         "/",
                         "/members/login",
                         "/members/register",
                         "/members/login/oauth2/code/kakao",
-                        "/api/members/login",
-                        "/api/members/register",
-                        "/css/**", "/js/**", "/error", "/favicon.ico"
+                        "/css/**", "/js/**", "/error", "/favicon.ico", "/h2-console/**"
                 );
 
+        // 2. 관리자 인터셉터: 관리자용 웹 페이지만 보호
         registry.addInterceptor(adminInterceptor)
                 .order(2)
-                .addPathPatterns("/admin/**", "/api/admin/**");
+                .addPathPatterns("/admin/**"); // API 경로 제외
     }
 
     @Override

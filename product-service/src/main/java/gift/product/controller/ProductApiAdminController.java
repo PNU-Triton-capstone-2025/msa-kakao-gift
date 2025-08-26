@@ -39,12 +39,7 @@ public class ProductApiAdminController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addProduct(
-            @RequestHeader("X-Member-Role") String role,
-            @RequestBody @Valid ProductRequestDto requestDto) throws AccessDeniedException {
-
-        checkAdmin(role);
-
+    public ResponseEntity<Void> addProduct(@RequestBody @Valid ProductRequestDto requestDto) {
         productService.saveProduct(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -67,28 +62,18 @@ public class ProductApiAdminController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateProduct(
-            @RequestHeader("X-Member-Role") String role,
             @PathVariable Long id,
-            @RequestBody @Valid ProductEditRequestDto requestDto) throws AccessDeniedException {
+            @RequestBody @Valid ProductEditRequestDto requestDto) {
 
-        checkAdmin(role);
         productService.update(id, requestDto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
-            @RequestHeader("X-Member-Role") String role,
-            @PathVariable Long id) throws AccessDeniedException {
+            @PathVariable Long id) {
 
-        checkAdmin(role);
         productService.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private void checkAdmin(String role) throws AccessDeniedException {
-        if (!"ADMIN".equalsIgnoreCase(role)) {
-            throw new AccessDeniedException("관리자 권한이 필요합니다.");
-        }
     }
 }

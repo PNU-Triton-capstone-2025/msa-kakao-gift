@@ -1,5 +1,6 @@
 package gift.product.controller;
 
+import gift.auth.AuthUtil;
 import gift.auth.Login;
 import gift.common.enums.ProductSortProperty;
 import gift.common.validation.ValidSort;
@@ -9,6 +10,7 @@ import gift.product.dto.ProductEditRequestDto;
 import gift.product.dto.ProductInfoDto;
 import gift.product.dto.ProductRequestDto;
 import gift.product.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +40,11 @@ public class ProductAdminController {
     public String products(
             @ValidSort(enumClass = ProductSortProperty.class)
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            Model model
+            Model model,
+            HttpServletRequest request
     ) {
-        Page<ProductInfoDto> products = productService.getProducts(pageable)
+        String token = AuthUtil.extractToken(request);
+        Page<ProductInfoDto> products = productService.getProducts(pageable, token)
                 .map(product -> ProductInfoDto.productFrom(product));
 
         model.addAttribute("products", products);
@@ -49,8 +53,13 @@ public class ProductAdminController {
     }
 
     @GetMapping("/{id}")
-    public String productDetail(@PathVariable("id") Long id, Model model){
-        Product product = productService.getProduct(id);
+    public String productDetail(
+            @PathVariable("id") Long id,
+            HttpServletRequest request,
+            Model model){
+
+        String token = AuthUtil.extractToken(request);
+        Product product = productService.getProduct(id, token);
 
         model.addAttribute("product", ProductInfoDto.productFrom(product));
 
@@ -67,19 +76,26 @@ public class ProductAdminController {
     public String addProduct(
             @ModelAttribute("product") @Valid ProductRequestDto requestDto,
             BindingResult bindingResult,
-            @Login MemberTokenRequest memberToken
+            HttpServletRequest request
     ){
         if(bindingResult.hasErrors()){
             return "admin/product-add-form";
         }
 
-        productService.saveProduct(requestDto, memberToken);
+        String token = AuthUtil.extractToken(request);
+
+        productService.saveProduct(requestDto, token);
         return "redirect:/admin/products";
     }
 
     @GetMapping("/edit/{id}")
-    public String editProductForm(@PathVariable("id") Long id, Model model){
-        Product product = productService.getProduct(id);
+    public String editProductForm(
+            @PathVariable("id") Long id,
+            HttpServletRequest reqeust,
+            Model model){
+
+        String token = AuthUtil.extractToken(reqeust);
+        Product product = productService.getProduct(id, token);
 
         model.addAttribute("product", new ProductEditRequestDto(
                 product.getName(),
@@ -95,7 +111,7 @@ public class ProductAdminController {
     public String editProduct(
             @PathVariable("id") Long id,
             @ModelAttribute("product") @Valid ProductEditRequestDto requestDto,
-            @Login MemberTokenRequest memberToken,
+            HttpServletRequest request,
             BindingResult bindingResult,
             Model model
     ){
@@ -103,17 +119,19 @@ public class ProductAdminController {
             model.addAttribute("productId", id);
             return "/admin/product-edit-form";
         }
-
-        productService.update(id, requestDto, memberToken);
+        String token = AuthUtil.extractToken(request);
+        productService.update(id, requestDto, token);
 
         return "redirect:/admin/products/" + id;
     }
 
     @DeleteMapping("/{id}")
     public String deleteProduct(
-            @Login MemberTokenRequest memberToken,
+            HttpServletRequest reqeust,
             @PathVariable("id") Long id) {
-        productService.delete(id, memberToken);
+
+        String token = AuthUtil.extractToken(reqeust);
+        productService.delete(id, token);
 
         return "redirect:/admin/products";
     }

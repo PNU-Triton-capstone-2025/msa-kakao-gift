@@ -17,14 +17,14 @@ public class KakaoOAuthController {
 
     public KakaoOAuthController(RestClient.Builder builder) {
         userApiClient = builder
-                .baseUrl("http://localhost:8084")
+                .baseUrl("http://localhost:8085")
                 .build();
     }
 
     @GetMapping("/oauth2/code/kakao")
     public String kakaoRedirect(@RequestParam("code") String code, HttpServletResponse reponse) {
         MemberTokenResponse tokenResponse = userApiClient.get()
-                .uri("/members/login/oauth2/code/kakao?code={code}", code)
+                .uri("/api/members/login/oauth/kakao?code={code}", code)
                 .retrieve()
                 .body(MemberTokenResponse.class);
 

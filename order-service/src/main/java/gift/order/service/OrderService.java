@@ -62,7 +62,6 @@ public class OrderService {
             return optionDetail.productId();
         } catch (Exception e) {
             log.error("product-service에서 옵션 정보 조회 실패 - optionId: {}", optionId, e);
-            // 이 경우 주문을 실패 처리해야 합니다. 상품 정보 없이는 주문을 진행할 수 없습니다.
             throw new IllegalStateException("상품 정보를 조회하는 데 실패했습니다.", e);
         }
     }
@@ -82,7 +81,6 @@ public class OrderService {
                     .retrieve()
                     .toBodilessEntity();
         } catch (Exception e) {
-            // 위시리스트 삭제 실패는 주문 성공에 영향을 주지 않아야 합니다. 로그만 남깁니다.
             log.error("주문 완료 후 위시리스트 삭제 요청 실패 - memberId: {}, productId: {}", memberId, productId, e);
         }
     }
