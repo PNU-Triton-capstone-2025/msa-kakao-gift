@@ -1,5 +1,5 @@
 server:
-  port: 8085 # ???? ?? ???
+  port: 8080 # ???? ?? ???
 
 spring:
   application:
@@ -10,7 +10,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]': # 모든 경로에 대해 CORS 정책 적용
-            allowedOrigins: "http://localhost:8080"
+            allowedOrigins: "http://localhost:8085"
             allowedMethods:
               - GET
               - POST
