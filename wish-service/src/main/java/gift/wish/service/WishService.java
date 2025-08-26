@@ -92,14 +92,14 @@ public class WishService {
 
     private void validateProductExists(Long productId) {
         productRestClient.get()
-                .uri("/api/admin/products/{id}", productId)
+                .uri("/api/products/{id}", productId)
                 .retrieve()
                 .toBodilessEntity();
     }
 
     private ProductResponseDto getProductById(Long productId) {
         return productRestClient.get()
-                .uri("/api/admin/products/{id}", productId)
+                .uri("/api/products/{id}", productId)
                 .retrieve()
                 .body(ProductResponseDto.class);
     }
