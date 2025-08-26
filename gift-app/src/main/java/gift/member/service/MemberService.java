@@ -51,19 +51,19 @@ public class MemberService {
                 .body(MemberTokenResponse.class);
     }
 
-    public void updatePassword(MemberTokenRequest memberTokenRequest, MemberUpdateRequest request) {
+    public void updatePassword(String token, MemberUpdateRequest request) {
         restClient.patch()
                 .uri("/api/members/edit")
-                .header("Authorization", "Bearer " + memberTokenRequest.token())
+                .header("Authorization", "Bearer " + token)
                 .body(request)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    public void deleteMember(MemberTokenRequest memberTokenRequest, String password) {
-        restClient.post()
+    public void deleteMember(String token, String password) {
+        restClient.delete()
                 .uri("/api/members/delete?password={password}", password)
-                .header("Authorization", "Bearer " + memberTokenRequest.token())
+                .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .toBodilessEntity();
     }
