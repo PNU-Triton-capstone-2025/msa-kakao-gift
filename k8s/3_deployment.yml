@@ -18,7 +18,7 @@ spec:
       - name: api-gateway
         image: your-dockerhub-username/api-gateway:latest # 👈 Docker Hub 이미지 주소로 변경
         ports:
-        - containerPort: 8085
+        - containerPort: 8080
         envFrom:
         - configMapRef: { name: gift-config }
         - secretRef: { name: gift-secret }
@@ -68,7 +68,7 @@ spec:
       - name: gift-app
         image: your-dockerhub-username/gift-app:latest # 👈 Docker Hub 이미지 주소로 변경
         ports:
-        - containerPort: 8080
+        - containerPort: 8085
         envFrom:
         - configMapRef: { name: gift-config }
         - secretRef: { name: gift-secret }

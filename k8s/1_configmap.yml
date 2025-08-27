@@ -5,11 +5,10 @@ metadata:
   namespace: gift-service
 data:
   # 서비스 간 통신 주소 (Kubernetes 내부 DNS 사용)
-  API_GATEWAY_URI: "http://api-gateway-svc:8085"
+  API_GATEWAY_URI: "http://api-gateway-svc:8080"
   SERVICE_USER_URI: "http://user-service-svc:8084"
   SERVICE_PRODUCT_URI: "http://product-service-svc:8081"
   SERVICE_WISH_URI: "http://wish-service-svc:8082"
   SERVICE_ORDER_URI: "http://order-service-svc:8083"
-  # 카카오 리다이렉트 URI (외부에서 접근 가능한 주소로 변경 필요)
-  KAKAO_REDIRECT_URI: "http://localhost:8085/members/login/oauth2/code/kakao"
-  FRONT_DOMAIN: "http://localhost:8085" # gift-app의 외부 주소
+  KAKAO_REDIRECT_URI: "http://localhost/members/login/oauth2/code/kakao"
+  FRONT_DOMAIN: "http://localhost" 
