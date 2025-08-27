@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gift-ingress
+  namespace: gift-service
+spec:
+  rules:
+  - host: "your-gift-app.com" # 👈 실제 사용할 도메인으로 변경
+    http:
+      paths:
+      # '/' 로 시작하는 모든 요청은 gift-app(BFF)으로 보냅니다.
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gift-app-svc
+            port:
+              number: 8080
+      # '/api' 로 시작하는 요청만 API Gateway로 보냅니다.
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-gateway-svc
+            port:
+              number: 8085

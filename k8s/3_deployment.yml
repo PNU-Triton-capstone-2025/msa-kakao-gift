@@ -1,0 +1,149 @@
+# --- API Gateway Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: your-dockerhub-username/api-gateway:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8085
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
+---
+# --- User Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: your-dockerhub-username/user-service:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8084
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
+---
+# Gift App (BFF) Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gift-app-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gift-app
+  template:
+    metadata:
+      labels:
+        app: gift-app
+    spec:
+      containers:
+      - name: gift-app
+        image: your-dockerhub-username/gift-app:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
+---
+# Product Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+      - name: product-service
+        image: your-dockerhub-username/product-service:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8081
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
+---
+# Wish Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wish-service-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wish-service
+  template:
+    metadata:
+      labels:
+        app: wish-service
+    spec:
+      containers:
+      - name: wish-service
+        image: your-dockerhub-username/wish-service:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8082
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
+---
+# Order Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service-deployment
+  namespace: gift-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: your-dockerhub-username/order-service:latest # 👈 Docker Hub 이미지 주소로 변경
+        ports:
+        - containerPort: 8083
+        envFrom:
+        - configMapRef: { name: gift-config }
+        - secretRef: { name: gift-secret }
