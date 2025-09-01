@@ -6,6 +6,8 @@ import gift.wish.dto.WishInfo;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishResponse;
 import gift.wish.repository.WishRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,7 +21,7 @@ import java.util.NoSuchElementException;
 
 @Service
 public class WishService {
-
+    private static final Logger log = LoggerFactory.getLogger(WishService.class);
     private final WishRepository wishRepository;
     private final RestClient productRestClient;
 
