@@ -4,6 +4,8 @@ import gift.auth.oauth.dto.KakaoTokenResponseDto;
 import gift.auth.oauth.dto.KakaoUserInfoResponseDto;
 import gift.auth.oauth.exception.KakaoApiFailedException;
 import gift.common.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import org.springframework.web.client.RestClient;
 
 @Component
 public class KakaoApiClient {
+    private static final Logger log = LoggerFactory.getLogger(KakaoApiClient.class);
     private final RestClient authClient;
     private final RestClient apiClient;
     private final KakaoProperties properties;
@@ -45,6 +48,7 @@ public class KakaoApiClient {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (request, response) -> {
                     String errorMsg = "카카오 Token 요청 API 호출 실패. 상태 코드: " + response.getStatusCode();
+                    log.error(errorMsg);
                     throw new KakaoApiFailedException(errorMsg, response.getStatusCode());
                 })
                 .body(KakaoTokenResponseDto.class);
@@ -59,6 +63,7 @@ public class KakaoApiClient {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), (request, response) -> {
                     String errorMsg = "카카오 사용자 정보 API 호출 실패. 상태 코드: " + response.getStatusCode();
+                    log.error(errorMsg);
                     throw new KakaoApiFailedException(errorMsg, response.getStatusCode());
                 })
                 .body(KakaoUserInfoResponseDto.class);

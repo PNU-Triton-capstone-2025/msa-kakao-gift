@@ -6,6 +6,8 @@ import gift.wish.dto.WishInfo;
 import gift.wish.dto.WishListResponse;
 import gift.wish.dto.WishResponse;
 import gift.wish.repository.WishRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -19,7 +21,7 @@ import java.util.NoSuchElementException;
 
 @Service
 public class WishService {
-
+    private static final Logger log = LoggerFactory.getLogger(WishService.class);
     private final WishRepository wishRepository;
     private final RestClient productRestClient;
 
@@ -102,16 +104,28 @@ public class WishService {
     }
 
     private void validateProductExists(Long productId) {
-        productRestClient.get()
-                .uri("/api/products/{id}", productId)
-                .retrieve()
-                .toBodilessEntity();
+        try {
+            productRestClient.get()
+                    .uri("/api/products/{id}", productId)
+                    .retrieve()
+                    .toBodilessEntity();
+        }
+        catch (Exception e) {
+            log.error("product-service에서 상품 정보 조회 실패 - productId: {}", productId, e);
+            throw e;
+        }
     }
 
     private ProductResponseDto getProductById(Long productId) {
-        return productRestClient.get()
-                .uri("/api/products/{id}", productId)
-                .retrieve()
-                .body(ProductResponseDto.class);
+        try {
+            return productRestClient.get()
+                    .uri("/api/products/{id}", productId)
+                    .retrieve()
+                    .body(ProductResponseDto.class);
+        }
+        catch (Exception e) {
+            log.error("product-service에서 상품 정보 조회 실패 - productId: {}", productId, e);
+            throw e;
+        }
     }
 }
