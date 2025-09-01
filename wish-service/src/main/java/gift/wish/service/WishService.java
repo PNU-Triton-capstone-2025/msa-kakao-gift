@@ -104,16 +104,28 @@ public class WishService {
     }
 
     private void validateProductExists(Long productId) {
-        productRestClient.get()
-                .uri("/api/products/{id}", productId)
-                .retrieve()
-                .toBodilessEntity();
+        try {
+            productRestClient.get()
+                    .uri("/api/products/{id}", productId)
+                    .retrieve()
+                    .toBodilessEntity();
+        }
+        catch (Exception e) {
+            log.error("product-service에서 상품 정보 조회 실패 - productId: {}", productId, e);
+            throw e;
+        }
     }
 
     private ProductResponseDto getProductById(Long productId) {
-        return productRestClient.get()
-                .uri("/api/products/{id}", productId)
-                .retrieve()
-                .body(ProductResponseDto.class);
+        try {
+            return productRestClient.get()
+                    .uri("/api/products/{id}", productId)
+                    .retrieve()
+                    .body(ProductResponseDto.class);
+        }
+        catch (Exception e) {
+            log.error("product-service에서 상품 정보 조회 실패 - productId: {}", productId, e);
+            throw e;
+        }
     }
 }
