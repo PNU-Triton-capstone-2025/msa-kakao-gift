@@ -3,29 +3,33 @@
 ## MSA 토폴로지
 ```mermaid
 flowchart TB
+    %% North-South 영역
     Browser[[Browser]]
     GiftApp["gift-app (BFF)"]
     APIGW["api-gateway"]
 
     Browser --> GiftApp --> APIGW
 
-    direction LR
-    UserSvc["user-service<br/>인증/계정"]
-    ProductSvc["product-service<br/>카탈로그 + 관리자"]
-    WishSvc["wish-service<br/>위시리스트"]
-    OrderSvc["order-service<br/>주문"]
+    %% East-West 영역 (서비스 도메인)
+    subgraph Services["Microservices Domain (East-West)"]
+        direction LR
+        UserSvc["user-service<br/>인증/계정"]
+        ProductSvc["product-service<br/>카탈로그 + 관리자"]
+        WishSvc["wish-service<br/>위시리스트"]
+        OrderSvc["order-service<br/>주문"]
+    end
 
+    %% Gateway → Services (North-South 진입)
     APIGW --> UserSvc
     APIGW --> ProductSvc
     APIGW --> WishSvc
     APIGW --> OrderSvc
 
-    %% East-West (점선)
+    %% East-West 내부 통신 (점선)
     OrderSvc -. "옵션/재고 확인" .-> ProductSvc
     OrderSvc -. "위시 삭제" .-> WishSvc
     OrderSvc -. "카카오 토큰 조회" .-> UserSvc
     WishSvc -. "상품 존재 확인" .-> ProductSvc
-
 ```
 
 - **내부 도메인 East-West Traffic**: `order-service`가 상품 옵션/재고 확인 및 위시 삭제, 카카오 토큰 조회를 위해 `product-service`·`wish-service`·`user-service`를 직접 RestClient로 호출하고, `wish-service`가 위시 추가/조회 시 `product-service`를 조회합니다.
