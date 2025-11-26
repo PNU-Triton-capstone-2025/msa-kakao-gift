@@ -89,13 +89,13 @@ flowchart TB
 
 
 ## 마이크로서비스 간 의존성 및 통신 흐름
-- **gift‑app → API Gateway** – 모든 API 호출을 게이트웨이로 전달하며 JWT를 포함합니다.
-- **API Gateway → 각 서비스** – 라우팅 룰과 필터를 통해 요청을 적절한 서비스로 전달합니다. 경로 기준으로 user‑service, product‑service, wish‑service, order‑service에 매핑하며 필터에서 인증을 수행합니다.
-- **product‑service → DB** – 상품, 옵션 정보를 자체 데이터베이스에 저장합니다.
-- **wish‑service → product‑service** – 상품 존재 여부를 확인하고 위시리스트 화면에 상품 정보를 추가합니다.
-- **order‑service → product‑service** – 주문 시 옵션 재고를 차감하고 옵션 ID에서 상품 ID를 조회합니다.
-- **order‑service → wish‑service** – 주문 완료 후 위시리스트에서 해당 상품을 삭제합니다.
-- **order‑service → user‑service** – 카카오톡 메시지 전송을 위해 회원의 카카오 엑세스 토큰을 조회합니다.
+- **gift‑app → API Gateway**: 모든 API 호출을 게이트웨이로 전달하며 JWT를 포함합니다.
+- **API Gateway → 각 서비스**: 라우팅 룰과 필터를 통해 요청을 적절한 서비스로 전달합니다. 경로 기준으로 user‑service, product‑service, wish‑service, order‑service에 매핑하며 필터에서 인증을 수행합니다.
+- **product‑service → DB**: 상품, 옵션 정보를 자체 데이터베이스에 저장합니다.
+- **wish‑service → product‑service**: 상품 존재 여부를 확인하고 위시리스트 화면에 상품 정보를 추가합니다.
+- **order‑service → product‑service**: 주문 시 옵션 재고를 차감하고 옵션 ID에서 상품 ID를 조회합니다.
+- **order‑service → wish‑service**: 주문 완료 후 위시리스트에서 해당 상품을 삭제합니다.
+- **order‑service → user‑service**: 카카오톡 메시지 전송을 위해 회원의 카카오 엑세스 토큰을 조회합니다.
 
 ## 배포 및 운영
 - `k8s/deployment.yml`에 모든 컴포넌트의 Deployment/Service가 한 네임스페이스로 정의되며, `ConfigMap`으로 내부 주소를, `Secret`으로 JWT/Kakao 민감값을 주입합니다.
