@@ -32,10 +32,18 @@ flowchart TB
     WishSvc -. "상품 존재 확인" .-> ProductSvc
 ```
 
-- **내부 도메인 East-West Traffic**: `order-service`가 상품 옵션/재고 확인 및 위시 삭제, 카카오 토큰 조회를 위해 `product-service`·`wish-service`·`user-service`를 직접 RestClient로 호출하고, `wish-service`가 위시 추가/조회 시 `product-service`를 조회합니다.
-- **단일 진입점 + 헤더 기반 아이덴티티 전파**: 인증을 API Gateway에서 검증·전파해 각 도메인 서비스는 헤더 계약만 신뢰하면 됩니다.
-- **역할 기반 보호**: 상품 관리자 API에 한정해 `X-Member-Role`을 검사하므로, 현재 역할 검증 범위를 구분했습니다.
-- **확장 여지**: 신규 도메인 서비스 추가 시 게이트웨이에 라우트만 정의하면 외부 트래픽 연결이 가능하며, 내부 협력이 필요할 경우 RestClient 기반 계약을 추가해 점진적으로 확장할 수 있습니다.
+- **내부 도메인 East-West Traffic**:
+  - 각 마이크로서비스는 자신의 도메인 책임을 유지하면서 필요한 범위에서 다른 서비스를 호출합니다.
+  - order-service는 주문 생성 과정에서 상품 옵션 및 재고 검증을 위해 product-service를, 주문 완료 후 위시 정리를 위해 wish-service를, 그리고 카카오 알림 발송을 위해 user-service의 카카오 액세스 토큰 조회 API를 호출합니다.
+  - 또한 wish-service는 위시 추가 및 조회 시 상품의 존재 여부 검증을 위해 product-service와 직접 통신합니다.
+- **단일 진입점 기반 North-South 트래픽**:
+  - 모든 외부 요청은 API Gateway를 통해 유입되며, 게이트웨이는 요청 경로에 따라 각 도메인 서비스로 라우팅합니다.
+- **JWT 중앙 검증 + 헤더 기반 사용자 식별 전파**:
+  - JWT 검증 책임은 API Gateway에만 존재합니다.
+  - 게이트웨이는 토큰 검증 후 사용자 식별 정보와 역할을 X-Member-Id, X-Member-Role 헤더로 변환하여 각 서비스로 전달합니다.
+  - 도메인 서비스는 JWT를 직접 처리하지 않고 헤더 계약만을 신뢰함으로써 인증 로직을 제거하고 비즈니스 로직에 집중할 수 있도록 설계되었습니다.
+- **확장 여지**:
+  - 신규 도메인 서비스 추가 시 게이트웨이에 라우트만 정의하면 외부 트래픽 연결이 가능하며, 내부 협력이 필요할 경우 RestClient 기반 계약을 통해 점진적으로 East-West 통신을 확장할 수 있습니다.
 
 ## 서비스 구성 요소
 - **gift-app (BFF + UI)**
