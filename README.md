@@ -3,12 +3,17 @@
 ## MSA 토폴로지
 ```mermaid
 flowchart TB
+
     %% North-South 영역
     Browser[[Browser]]
     GiftApp["gift-app (BFF)"]
-    APIGW["api-gateway"]
+
+    subgraph GW["api-gateway"]
+        APIGW["JWT Validation + Routing"]
+    end
 
     Browser --> GiftApp --> APIGW
+
 
     %% East-West 영역 (서비스 도메인)
     subgraph Services["Microservices Domain (East-West)"]
@@ -19,17 +24,20 @@ flowchart TB
         OrderSvc["order-service<br/>주문"]
     end
 
-    %% Gateway → Services (North-South 진입)
-    APIGW --> UserSvc
-    APIGW --> ProductSvc
-    APIGW --> WishSvc
-    APIGW --> OrderSvc
 
-    %% East-West 내부 통신 (점선)
+    %% Gateway → Services (North-South)
+    APIGW -->|X-Member-Id / Role 전달| UserSvc
+    APIGW -->|X-Member-Id / Role 전달| ProductSvc
+    APIGW -->|X-Member-Id / Role 전달| WishSvc
+    APIGW -->|X-Member-Id / Role 전달| OrderSvc
+
+
+    %% East-West 내부 통신 (직접 RestClient 호출)
     OrderSvc -. "옵션/재고 확인" .-> ProductSvc
     OrderSvc -. "위시 삭제" .-> WishSvc
     OrderSvc -. "카카오 토큰 조회" .-> UserSvc
     WishSvc -. "상품 존재 확인" .-> ProductSvc
+
 ```
 
 - **내부 도메인 East-West Traffic**:
