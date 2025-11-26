@@ -39,13 +39,12 @@ flowchart TB
     WishSvc -. "상품 존재 확인" .-> ProductSvc
 
 ```
-
+- **단일 진입점 기반 North-South 트래픽**:
+  - 모든 외부 요청은 API Gateway를 통해 유입되며, 게이트웨이는 요청 경로에 따라 각 도메인 서비스로 라우팅합니다.
 - **내부 도메인 East-West Traffic**:
   - 각 마이크로서비스는 자신의 도메인 책임을 유지하면서 필요한 범위에서 다른 서비스를 호출합니다.
   - order-service는 주문 생성 과정에서 상품 옵션 및 재고 검증을 위해 product-service를, 주문 완료 후 위시 정리를 위해 wish-service를, 그리고 카카오 알림 발송을 위해 user-service의 카카오 액세스 토큰 조회 API를 호출합니다.
   - 또한 wish-service는 위시 추가 및 조회 시 상품의 존재 여부 검증을 위해 product-service와 직접 통신합니다.
-- **단일 진입점 기반 North-South 트래픽**:
-  - 모든 외부 요청은 API Gateway를 통해 유입되며, 게이트웨이는 요청 경로에 따라 각 도메인 서비스로 라우팅합니다.
 - **JWT 중앙 검증 + 헤더 기반 사용자 식별 전파**:
   - JWT 검증 책임은 API Gateway에만 존재합니다.
   - 게이트웨이는 토큰 검증 후 사용자 식별 정보와 역할을 X-Member-Id, X-Member-Role 헤더로 변환하여 각 서비스로 전달합니다.
