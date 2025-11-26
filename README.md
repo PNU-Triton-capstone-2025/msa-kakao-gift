@@ -2,39 +2,40 @@
 
 ## MSA 토폴로지
 ```mermaid
-flowchart LR
+flowchart TB
+    %% North-South Traffic (수직 흐름)
     Browser[[Browser]]
-    subgraph BFF
-        GiftApp["gift-app
-                (Thymeleaf + REST BFF)"]
-    end
-    APIGW["api-gateway
-          (Spring Cloud Gateway)"]
-    UserSvc["user-service
-            (인증/계정)"]
-    ProductSvc["product-service
-                (카탈로그 + 관리자)"]
-    WishSvc["wish-service
-              (위시리스트)"]
-    OrderSvc["order-service
-              (주문)"]
+    GiftApp(["gift-app (BFF)"])
+    APIGW["api-gateway"]
 
-    Browser <--> GiftApp
-    GiftApp --> APIGW
+    Browser --> GiftApp --> APIGW
+
+    %% East-West Traffic (수평 흐름)
+    subgraph Services[Microservices - East West]
+        direction LR
+        UserSvc["user-service
+인증/계정"]
+        ProductSvc["product-service
+카탈로그 + 관리자"]
+        WishSvc["wish-service
+위시리스트"]
+        OrderSvc["order-service
+주문"]
+    end
+
     APIGW --> UserSvc
     APIGW --> ProductSvc
     APIGW --> WishSvc
     APIGW --> OrderSvc
 
-    %% 내부 서비스 간 호출 (재고/회원/위시 검증)
-    OrderSvc -.-> ProductSvc
-    OrderSvc -.-> WishSvc
-    OrderSvc -.-> UserSvc
-    WishSvc -.-> ProductSvc
+    %% 내부 서비스 간 East-West 협력
+    OrderSvc -- "옵션/재고 확인" --> ProductSvc
+    OrderSvc -- "위시 삭제" --> WishSvc
+    OrderSvc -- "카카오 토큰 조회" --> UserSvc
+    WishSvc -- "상품 존재 확인" --> ProductSvc
 ```
-- **클라이언트 트래픽 경로**는 게이트웨이를 경유한 REST 계약에 한정됩니다.
-- **내부 도메인 협력 경로**는 `order-service`가 상품 옵션/재고 확인 및 위시 삭제, 카카오 토큰 조회를 위해 `product-service`·`wish-service`·`user-service`를 직접 RestClient로 호출하고, `wish-service`가 위시 추가/조회 시 `product-service`를 조회합니다.
-- 각 서비스는 자체 스택으로 독립 배포되며, K8s `deployment.yml`에서 동일 네임스페이스(`gift-service`) 안에 배포됩니다.
+
+- **내부 도메인 East-West Traffic**: `order-service`가 상품 옵션/재고 확인 및 위시 삭제, 카카오 토큰 조회를 위해 `product-service`·`wish-service`·`user-service`를 직접 RestClient로 호출하고, `wish-service`가 위시 추가/조회 시 `product-service`를 조회합니다.
 - **단일 진입점 + 헤더 기반 아이덴티티 전파**: 인증을 API Gateway에서 검증·전파해 각 도메인 서비스는 헤더 계약만 신뢰하면 됩니다.
 - **역할 기반 보호**: 상품 관리자 API에 한정해 `X-Member-Role`을 검사하므로, 현재 역할 검증 범위를 구분했습니다.
 - **확장 여지**: 신규 도메인 서비스 추가 시 게이트웨이에 라우트만 정의하면 외부 트래픽 연결이 가능하며, 내부 협력이 필요할 경우 RestClient 기반 계약을 추가해 점진적으로 확장할 수 있습니다.
@@ -67,7 +68,7 @@ flowchart LR
 - **order-service (주문 생성)**
   - 주문 생성 시 호출자 `X-Member-Id`를 받아 주문을 생성하고 카카오톡 알림을 전송합니다.
   - 주문 요청을 처리하면서 상품 옵션 상세·재고 차감, 주문 후 위시 삭제, 카카오 메시지 발송을 위해 `product-service`, `wish-service`, `user-service`를 RestClient로 직접 호출합니다. 이때 내부 통신에는 게이트웨이 인증 헤더를 사용하지 않습니다.
-  - 주문 생성 로직을 별도 서비스로 두어 결제/메시징 로직을 독립적으로 확장할 수 있지만, 재고/회원/위시 데이터에 대한 내부 호출 실패 시 주문 실패 또는 보상 로직이 필요합니다.
+  - 재고/회원/위시 데이터에 대한 내부 호출 실패 시, 주문 실패 또는 보상 로직이 없는 점은 추후 보완되어야 합니다.
 
 
 ## 토큰 처리 방식과 인증 흐름
