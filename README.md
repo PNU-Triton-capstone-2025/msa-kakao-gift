@@ -39,7 +39,7 @@ flowchart TB
     WishSvc -. "상품 존재 확인" .-> ProductSvc
 
 ```
-- **단일 진입점 기반 North-South 트래픽**:
+- **단일 진입점 기반 North-South Traffic**:
   - 외부 사용자의 요청은 gift-app(BFF)을 통해 수신되며, gift-app은 모든 API 호출을 API Gateway로 위임합니다. API Gateway는 해당 요청을 인증·검증한 뒤, 요청 경로에 따라 적절한 도메인 서비스로 라우팅합니다.
 - **내부 도메인 East-West Traffic**:
   - 각 마이크로서비스는 자신의 도메인 책임을 유지하면서 필요한 범위에서 다른 서비스를 호출합니다.
