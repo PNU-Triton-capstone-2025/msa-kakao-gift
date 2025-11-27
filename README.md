@@ -40,7 +40,7 @@ flowchart TB
 
 ```
 - **단일 진입점 기반 North-South 트래픽**:
-  - 모든 외부 요청은 API Gateway를 통해 유입되며, 게이트웨이는 요청 경로에 따라 각 도메인 서비스로 라우팅합니다.
+  - 외부 사용자의 요청은 gift-app(BFF)을 통해 수신되며, gift-app은 모든 API 호출을 API Gateway로 위임합니다. API Gateway는 해당 요청을 인증·검증한 뒤, 요청 경로에 따라 적절한 도메인 서비스로 라우팅합니다.
 - **내부 도메인 East-West Traffic**:
   - 각 마이크로서비스는 자신의 도메인 책임을 유지하면서 필요한 범위에서 다른 서비스를 호출합니다.
   - order-service는 주문 생성 과정에서 상품 옵션 및 재고 검증을 위해 product-service를, 주문 완료 후 위시 정리를 위해 wish-service를, 그리고 카카오 알림 발송을 위해 user-service의 카카오 액세스 토큰 조회 API를 호출합니다.
