@@ -1,7 +1,10 @@
 # 서비스 아키텍처 개요
 
 ## MSA 토폴로지
-<img width="600" height="750" alt="image" src="https://github.com/user-attachments/assets/fe25c154-81c6-4123-afe8-27da86905833"/>
+<div align="center">
+  <img width="500" height="600" alt="image" src="https://github.com/user-attachments/assets/fe25c154-81c6-4123-afe8-27da86905833">
+</div>
+<br>
 
 - **단일 진입점 기반 North-South Traffic**:
   - 외부 사용자의 요청은 gift-app(BFF)을 통해 수신되며, gift-app은 모든 API 호출을 API Gateway로 위임합니다. API Gateway는 해당 요청을 인증·검증한 뒤, 요청 경로에 따라 적절한 도메인 서비스로 라우팅합니다.
