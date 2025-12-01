@@ -1,44 +1,8 @@
 # 서비스 아키텍처 개요
 
 ## MSA 토폴로지
-```mermaid
-flowchart TB
+<img width="600" height="750" alt="image" src="https://github.com/user-attachments/assets/fe25c154-81c6-4123-afe8-27da86905833"/>
 
-    %% North-South 영역
-    Browser[[Browser]]
-    GiftApp["gift-app (BFF)"]
-
-    subgraph GW["api-gateway"]
-        APIGW["JWT Validation + Routing"]
-    end
-
-    Browser --> GiftApp --> APIGW
-
-
-    %% East-West 영역 (서비스 도메인)
-    subgraph Services["Microservices Domain (East-West)"]
-        direction LR
-        UserSvc["user-service<br/>인증/계정"]
-        ProductSvc["product-service<br/>카탈로그 + 관리자"]
-        WishSvc["wish-service<br/>위시리스트"]
-        OrderSvc["order-service<br/>주문"]
-    end
-
-
-    %% Gateway → Services (North-South)
-    APIGW -->|X-Member-Id / Role 전달| UserSvc
-    APIGW -->|X-Member-Id / Role 전달| ProductSvc
-    APIGW -->|X-Member-Id / Role 전달| WishSvc
-    APIGW -->|X-Member-Id / Role 전달| OrderSvc
-
-
-    %% East-West 내부 통신 (직접 RestClient 호출)
-    OrderSvc -. "옵션/재고 확인" .-> ProductSvc
-    OrderSvc -. "위시 삭제" .-> WishSvc
-    OrderSvc -. "카카오 토큰 조회" .-> UserSvc
-    WishSvc -. "상품 존재 확인" .-> ProductSvc
-
-```
 - **단일 진입점 기반 North-South Traffic**:
   - 외부 사용자의 요청은 gift-app(BFF)을 통해 수신되며, gift-app은 모든 API 호출을 API Gateway로 위임합니다. API Gateway는 해당 요청을 인증·검증한 뒤, 요청 경로에 따라 적절한 도메인 서비스로 라우팅합니다.
 - **내부 도메인 East-West Traffic**:
